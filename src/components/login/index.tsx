@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -8,7 +9,7 @@ import { useForm } from "react-hook-form"
 export default function LoginPage() {
   const { register, handleSubmit } = useForm()
 
-  const onSubmit = (data) => {
+  const onSubmit = (data:any) => {
     console.log(data)
     // Add your login logic here
   }

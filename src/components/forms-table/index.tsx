@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -44,9 +45,9 @@ export function DataTable<TData, TValue>({
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
+          {table.getHeaderGroups().map((headerGroup:any) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
+              {headerGroup.headers.map((header:any) => {
                 const headerClassName =
                   String(header.column.columnDef.meta?.headerClassName) ??
                   "text-center";
@@ -72,12 +73,12 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row:any) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >
-                {row.getVisibleCells().map((cell) => {
+                {row.getVisibleCells().map((cell:any) => {
                   const cellClassName =
                     String(cell.column.columnDef.meta?.cellClassName) ??
                     "text-center";

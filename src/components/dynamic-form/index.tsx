@@ -26,7 +26,7 @@ import {
 import { ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Question } from "@/types/dashboard/components/form-builder";
-import { formData } from "../../app/api/question/[id]/data";
+import { formData } from "@/app/api/question/[id]/data";
 
 type FormData = {
   [key: string]: any;

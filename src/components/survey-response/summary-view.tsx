@@ -20,7 +20,7 @@ import {
 } from "recharts";
 import { pieChartData, verticalBarData } from "./survey-data";
 import { ScrollArea } from "../ui/scroll-area";
-import { Fragment } from "react";
+import { Fragment, ReactNode } from "react";
 import { Separator } from "../ui/separator";
 const tags = Array.from({ length: 50 }).map(
   (_, i, a) => `v1.2.0-beta.${a.length - i}`
@@ -76,8 +76,8 @@ export function SummaryView() {
                     className="fill-background"
                     stroke="none"
                     fontSize={12}
-                    formatter={(value: keyof typeof chartConfig) =>
-                      chartConfig[value]?.label
+                    formatter={(value: ReactNode) =>
+                      chartConfig[value as keyof typeof chartConfig]?.label
                     }
                   />
                   {pieChartData.map((entry, index) => (
