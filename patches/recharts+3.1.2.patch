@@ -1,0 +1,26 @@
+diff --git a/node_modules/recharts/types/component/Legend.d.ts b/node_modules/recharts/types/component/Legend.d.ts
+index b4b85b1..a70fb0e 100644
+--- a/node_modules/recharts/types/component/Legend.d.ts
++++ b/node_modules/recharts/types/component/Legend.d.ts
+@@ -5,7 +5,7 @@ import { LayoutType } from '../util/types';
+ import { UniqueOption } from '../util/payload/getUniqPayload';
+ import { ElementOffset } from '../util/useElementOffset';
+ export type LegendItemSorter = 'value' | 'dataKey' | ((item: LegendPayload) => number | string);
+-export type Props = Omit<DefaultProps, 'payload' | 'ref'> & {
++export type Props = Omit<DefaultProps, 'ref'> & {
+     wrapperStyle?: CSSProperties;
+     width?: number;
+     height?: number;
+diff --git a/node_modules/recharts/types/component/Tooltip.d.ts b/node_modules/recharts/types/component/Tooltip.d.ts
+index a559bc9..61b8f41 100644
+--- a/node_modules/recharts/types/component/Tooltip.d.ts
++++ b/node_modules/recharts/types/component/Tooltip.d.ts
+@@ -15,7 +15,7 @@ export type TooltipContentProps<TValue extends ValueType, TName extends NameType
+     active: boolean;
+     accessibilityLayer: boolean;
+ };
+-type PropertiesReadFromContext = 'viewBox' | 'active' | 'payload' | 'coordinate' | 'label' | 'accessibilityLayer';
++type PropertiesReadFromContext = 'viewBox' | 'active' | 'coordinate' | 'accessibilityLayer';
+ export type TooltipProps<TValue extends ValueType, TName extends NameType> = Omit<DefaultTooltipContentProps<TValue, TName>, PropertiesReadFromContext> & {
+     /**
+      * If true, then Tooltip is always displayed, once an activeIndex is set by mouse over, or programmatically.
