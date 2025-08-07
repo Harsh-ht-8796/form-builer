@@ -17,12 +17,13 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    domains: ['form-builer-be.onrender.com'],
     remotePatterns: [
       {
         protocol: "http",
         hostname: "localhost",
         port: "5000",
-      },
+      }
     ],
   },
   experimental: {

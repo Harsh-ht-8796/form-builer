@@ -31,7 +31,7 @@ interface QueryParams {
   isActive?: boolean;
   limit: number;
   page: number;
-  title: string;
+  title?: string;
   fromDate?: string;
   toDate?: string;
 }
@@ -42,10 +42,7 @@ export default function DraftFormsPage() {
     status: GetApiV1FormsSearchStatus.draft,
     isActive: true,
     limit: 10,
-    page: 0,
-    title: "form",
-    fromDate: undefined,
-    toDate: undefined,
+    page: 0
   });
 
   // Separate state for UI filters
