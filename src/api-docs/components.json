@@ -1,0 +1,218 @@
+{
+    "components": {
+        "schemas": {
+            "FormField": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "ShortText",
+                            "SelectBox"
+                        ],
+                        "description": "Type of the form field"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "Label for the form field"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "description": "Position of the field in the form"
+                    },
+                    "required": {
+                        "type": "boolean",
+                        "description": "Whether the field is required"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Options for SelectBox type field"
+                    }
+                },
+                "required": [
+                    "type",
+                    "label",
+                    "position"
+                ]
+            },
+            "FormSettings": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "email"
+                        },
+                        "description": "Email addresses for notifications"
+                    },
+                    "theme": {
+                        "type": "string",
+                        "description": "Theme color in hex format"
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "enum": [
+                            "domain_restricted",
+                            "public",
+                            "private"
+                        ],
+                        "description": "Visibility settings for the form"
+                    }
+                }
+            },
+            "FormRequest": {
+                "type": "object",
+                "properties": {
+                    "orgId": {
+                        "type": "string",
+                        "description": "Organization ID"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Title of the form"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the form"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FormField"
+                        },
+                        "description": "List of form fields"
+                    },
+                    "settings": {
+                        "$ref": "#/components/schemas/FormSettings"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "published",
+                            "archived"
+                        ],
+                        "description": "Status of the form"
+                    }
+                },
+                "required": [
+                    "orgId",
+                    "title",
+                    "description",
+                    "fields",
+                    "settings",
+                    "status"
+                ]
+            },
+            "FormResponse": {
+                "type": "object",
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "description": "Form ID"
+                    },
+                    "orgId": {
+                        "type": "string",
+                        "description": "Organization ID"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "description": "ID of the user who created the form"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Title of the form"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the form"
+                    },
+                    "allowedDomains": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of allowed domains"
+                    },
+                    "alowedEmails": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "email"
+                        },
+                        "description": "List of allowed email addresses"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "_id": {
+                                    "type": "string",
+                                    "description": "Field ID"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "description": "Type of the form field"
+                                },
+                                "label": {
+                                    "type": "string",
+                                    "description": "Label for the form field"
+                                },
+                                "options": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "Options for SelectBox type field"
+                                },
+                                "position": {
+                                    "type": "integer",
+                                    "description": "Position of the field in the form"
+                                },
+                                "required": {
+                                    "type": "boolean",
+                                    "description": "Whether the field is required"
+                                }
+                            }
+                        },
+                        "description": "List of form fields"
+                    },
+                    "settings": {
+                        "type": "object",
+                        "properties": {
+                            "visibility": {
+                                "type": "string",
+                                "description": "Visibility settings for the form"
+                            },
+                            "backgroundColor": {
+                                "type": "string",
+                                "description": "Background color in hex format"
+                            },
+                            "emailNotifications": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "format": "email"
+                                },
+                                "description": "Email addresses for notifications"
+                            }
+                        }
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Status of the form"
+                    },
+                    "__v": {
+                        "type": "integer",
+                        "description": "Version key"
+                    }
+                }
+            }
+        }
+    }
+}

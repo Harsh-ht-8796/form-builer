@@ -1,0 +1,582 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Form API",
+    "description": "API for creating and managing forms",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "Form": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormField"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/FormSettings"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "all"
+            ]
+          },
+          "coverImage": {
+            "type": "string"
+          },
+          "logoImage": {
+            "type": "string"
+          },
+          "__v": {
+            "type": "integer"
+          }
+        }
+      },
+      "FormField": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the field"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "short-text",
+              "long-text",
+              "multiple-choice",
+              "dropdown",
+              "checkbox"
+            ]
+          },
+          "fieldType": {
+            "type": "string",
+            "enum": [
+              "checkbox",
+              "radio",
+              "select",
+              "textarea",
+              "text"
+            ],
+            "description": "Type of the form field"
+          },
+          "title": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "order": {
+            "type": "integer"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FormSettings": {
+        "type": "object",
+        "properties": {
+          "visibility": {
+            "type": "string"
+          },
+          "backgroundColor": {
+            "type": "string"
+          },
+          "headerImage":{
+            "type":"string"
+          },
+          "emailNotifications": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "totalDocs": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          }
+        }
+      },
+      "FormRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title of the form"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the form"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormField"
+            },
+            "description": "List of form fields"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/FormSettings"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ],
+            "description": "Status of the form"
+          }
+        }
+      },
+      "FormResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Form ID"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "ID of the user who created the form"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the form"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the form"
+          },
+          "allowedDomains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of allowed domains"
+          },
+          "alowedEmails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "List of allowed email addresses"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Field ID"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Type of the form field"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Label for the form field"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Options for SelectBox type field"
+                },
+                "position": {
+                  "type": "integer",
+                  "description": "Position of the field in the form"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether the field is required"
+                }
+              }
+            },
+            "description": "List of form fields"
+          },
+          "order":{
+            "type":"integer"
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "visibility": {
+                "type": "string",
+                "description": "Visibility settings for the form"
+              },
+              "backgroundColor": {
+                "type": "string",
+                "description": "Background color in hex format"
+              },
+              "emailNotifications": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "description": "Email addresses for notifications"
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the form"
+          },
+          "__v": {
+            "type": "integer",
+            "description": "Version key"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/forms": {
+      "post": {
+        "summary": "Create a new form",
+        "description": "Creates a new form with the specified details",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FormRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Form created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/{id}": {
+      "get": {
+        "summary": "Get Form by ID",
+        "description": "Get a form by its ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Form created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Form"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "put": {
+        "summary": "Get Form by ID",
+        "description": "Get a form by its ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Form"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Form created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/search": {
+      "get": {
+        "summary": "Search forms",
+        "description": "Search forms by status with pagination.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter forms by status (e.g., draft, published)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "published",
+                "all"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of forms per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "Filter forms by active status (true/false)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "description": "Search forms by title",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "description": "Filter forms created after this date (ISO format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "description": "Filter forms created after this date (ISO format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "docs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Form"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/upload-images/{id}": {
+      "post": {
+        "summary": "Upload cover and logo images",
+        "description": "Uploads one or both images (`coverImage`, `logoImage`) to a form by ID. Accepts multipart/form-data.",
+        "tags": ["Forms"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "6874e131f3ccc5a289e7de9b"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coverImage": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "logoImage": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Images uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "coverImageUrl": {
+                      "type": "string",
+                      "example": "/uploads/1754488521261-hbzaai.png"
+                    },
+                    "coverImageHash": {
+                      "type": "string",
+                      "example": "501b8bbeb3212286a913c0084c2121a38119acc7daeb24d92e524ff3d5511a85"
+                    },
+                    "logoImageUrl": {
+                      "type": "string",
+                      "example": "/uploads/1754488503794-cwe6xl.png"
+                    },
+                    "logoImageHash": {
+                      "type": "string",
+                      "example": "501b8bbeb3212286a913c0084c2121a38119acc7daeb24d92e524ff3d5511a85"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No images uploaded or bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  }
+}
