@@ -22,6 +22,7 @@ import { Button } from "../ui/button";
 import { FileTextIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Image from "next/image";
+import { getSession } from "next-auth/react";
 
 type FormInputs = {
   selectedTheme: string;
@@ -37,11 +38,12 @@ export default function FormBuilder({ id }: { id: string }) {
     useForm<FormInputs>({
       defaultValues: async () => {
         try {
+          const session = await getSession();
           const { data } = await axios.get<Form>(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/forms/${id}`,
             {
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${session?.user?.accessToken}`,
               },
             }
           );
