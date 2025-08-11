@@ -2,6 +2,7 @@
 
 import {
   getGetApiV1FormsSearchQueryKey,
+  useDeleteApiV1FormsId,
   useGetApiV1FormsSearch,
 } from "@/api/formAPI";
 import { DataTable } from "@/components/forms-table";
@@ -47,6 +48,8 @@ export default function DraftFormsPage() {
     limit: 10,
     page: 0,
   });
+
+  const { mutateAsync: deleteForm } = useDeleteApiV1FormsId();
 
   // Separate state for UI filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,29 +132,39 @@ export default function DraftFormsPage() {
   // Fetch data using consolidated query parameters
   const { data: forms } = useGetApiV1FormsSearch(queryParams);
 
-  const filteredData = useCallback(() => {
-    console.log({ docs: forms?.docs });
-    return forms?.docs?.filter((form) => {
-      const matchesSearch =
-        form.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
+  // const filteredData = useCallback(() => {
+  //   console.log({ docs: forms?.docs });
+  //   return forms?.docs?.filter((form) => {
+  //     const matchesSearch =
+  //       form.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "true" && form.isActive) ||
-        (statusFilter === "false" && !form.isActive);
+  //     const matchesStatus =
+  //       statusFilter === "all" ||
+  //       (statusFilter === "true" && form.isActive) ||
+  //       (statusFilter === "false" && !form.isActive);
 
-      const formDate = form.createdAt ? new Date(form.createdAt) : null;
-      const matchesDate =
-        !dateRange.from ||
-        !dateRange.to ||
-        (formDate && formDate >= dateRange.from && formDate <= dateRange.to);
+  //     const formDate = form.createdAt ? new Date(form.createdAt) : null;
+  //     const matchesDate =
+  //       !dateRange.from ||
+  //       !dateRange.to ||
+  //       (formDate && formDate >= dateRange.from && formDate <= dateRange.to);
 
-      return matchesSearch && matchesStatus && matchesDate;
-    });
-  }, [forms, searchTerm, statusFilter, dateRange]);
+  //     return matchesSearch && matchesStatus && matchesDate;
+  //   });
+  // }, [forms, searchTerm, statusFilter, dateRange]);
 
   const router = useRouter();
 
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteForm({ id });
+      queryClient.invalidateQueries({
+        queryKey: [...getGetApiV1FormsSearchQueryKey(queryParams)],
+      });
+    } catch (error) {
+      console.error("Error deleting form:", error);
+    }
+  };
   const onChangeStatus = (status: string) => {
     setStatusFilter(status as "all" | "true" | "false");
     setQueryParams((prevState: any) => {
@@ -195,7 +208,12 @@ export default function DraftFormsPage() {
           >
             <Pencil className="h-4 w-4 text-gray-500" />
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button
+            variant="ghost"
+            onClick={() => handleDelete(row.getValue("_id"))}
+            size="sm"
+            className="h-8 w-8 p-0"
+          >
             <TfiTrash className="h-4 w-4 text-gray-500" />
           </Button>
         </div>

@@ -282,6 +282,84 @@ export function useGetApiV1FormsId<
 }
 
 /**
+ * Delete a form by its ID
+ * @summary Delete Form by ID
+ */
+export const deleteApiV1FormsId = (id: string) => {
+  return customInstance<Form>({ url: `/api/v1/forms/${id}`, method: "DELETE" });
+};
+
+export const getDeleteApiV1FormsIdMutationOptions = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteApiV1FormsId>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteApiV1FormsId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["deleteApiV1FormsId"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteApiV1FormsId>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteApiV1FormsId(id);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteApiV1FormsIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteApiV1FormsId>>
+>;
+
+export type DeleteApiV1FormsIdMutationError = ErrorType<null | null>;
+
+/**
+ * @summary Delete Form by ID
+ */
+export const useDeleteApiV1FormsId = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteApiV1FormsId>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteApiV1FormsId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteApiV1FormsIdMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
  * Get a form by its ID
  * @summary Get Form by ID
  */
