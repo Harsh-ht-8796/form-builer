@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { usePathname, useRouter } from "next/navigation";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/lib/actions/auth";
+import { useSession } from "next-auth/react";
 
 export default function DashboardLayout({
   children,
@@ -37,10 +38,20 @@ export default function DashboardLayout({
 
   const pathname = usePathname();
 
-
   const handleLogout = async () => {
-    logout()
+    logout();
+  };
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (!session?.user && status === "unauthenticated") {
+      router.push("/auth/login");
+    }
+  }, [session, router, status]);
+  if (status === "loading" || !session?.user) {
+    return <div>Loading...</div>;
   }
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -71,7 +82,7 @@ export default function DashboardLayout({
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           {index <
-                            pathname?.split("/").filter(Boolean).length - 1 ? (
+                          pathname?.split("/").filter(Boolean).length - 1 ? (
                             <BreadcrumbSeparator className="" />
                           ) : null}
                         </Fragment>
@@ -89,9 +100,7 @@ export default function DashboardLayout({
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   {" "}
-                  <Avatar
-                    className="cursor-pointer"
-                  >
+                  <Avatar className="cursor-pointer">
                     <AvatarImage
                       className="size-8 rounded-full bg-purple-100"
                       src="https://github.com/shadcn.png"

@@ -281,6 +281,82 @@
             "description": "Version key"
           }
         }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "v8@yopmail.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "Test@123"
+          },
+          "username": {
+            "type": "string",
+            "example": "john2"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "super_admin"
+            }
+          }
+        },
+        "required": ["email", "password", "username", "roles"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string", "example": "john2" },
+          "email": { "type": "string", "example": "v8@yopmail.com" },
+          "orgId": { "type": "string", "example": null },
+          "isEmailVerified": { "type": "boolean", "example": false },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string", "example": "super_admin" }
+          },
+          "createdAt": { "type": "string", "format": "date-time", "example": "2025-08-11T14:09:23.179Z" },
+          "updatedAt": { "type": "string", "format": "date-time", "example": "2025-08-11T14:09:23.179Z" },
+          "id": { "type": "string", "example": "6899f99319df009f1b9056c4" }
+        }
+      },
+      "AccessToken": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "ACCESS_TOKEN_JWT_STRING"
+          },
+          "expires": {
+            "type": "integer",
+            "example": 1754924963
+          }
+        }
+      },
+      "RefreshToken": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "REFRESH_TOKEN_JWT_STRING"
+          },
+          "expire": {
+            "type": "integer",
+            "example": 1757513363
+          }
+        }
+      },
+      "Tokens": {
+        "type": "object",
+        "properties": {
+          "access": { "$ref": "#/components/schemas/AccessToken" },
+          "refresh": { "$ref": "#/components/schemas/RefreshToken" }
+        }
       }
     }
   },
@@ -503,6 +579,18 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "mode for sent or draft",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "sent"
+              ]
+            }
           }
         ],
         "responses": {
@@ -606,6 +694,42 @@
           },
           "500": {
             "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Creates a new user account with email, username, password, and roles.",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" },
+                    "tokens": { "$ref": "#/components/schemas/Tokens" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or missing fields"
           }
         }
       }

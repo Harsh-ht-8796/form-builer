@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { GetApiV1FormsSearchStatus } from "./getApiV1FormsSearchStatus";
+import type { GetApiV1FormsSearchMode } from "./getApiV1FormsSearchMode";
 
 export type GetApiV1FormsSearchParams = {
   /**
@@ -36,4 +37,8 @@ export type GetApiV1FormsSearchParams = {
    * Filter forms created after this date (ISO format)
    */
   toDate?: string;
+  /**
+   * mode for sent or draft
+   */
+  mode?: GetApiV1FormsSearchMode;
 };

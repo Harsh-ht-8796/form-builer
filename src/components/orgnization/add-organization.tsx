@@ -23,8 +23,9 @@ export default function AddOrganizationComponent() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Input
-                id="email"
-                type="email"
+                id="name"
+                type="text"
+              placeholder="Organization Name"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
@@ -32,8 +33,9 @@ export default function AddOrganizationComponent() {
             <div className="space-y-2">
     
               <Input
-                id="password"
-                type="password"
+                id="local"
+                type="text"
+                placeholder="Local"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>

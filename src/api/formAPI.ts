@@ -27,8 +27,10 @@ import type {
   FormResponse,
   GetApiV1FormsSearch200,
   GetApiV1FormsSearchParams,
+  PostApiV1AuthRegister200,
   PostApiV1FormsUploadImagesId201,
   PostApiV1FormsUploadImagesIdBody,
+  RegisterRequest,
 } from "./model";
 
 import { customInstance } from "./mutator/custom-instance";
@@ -693,6 +695,93 @@ export const usePostApiV1FormsUploadImagesId = <
 > => {
   const mutationOptions =
     getPostApiV1FormsUploadImagesIdMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Creates a new user account with email, username, password, and roles.
+ * @summary Register a new user
+ */
+export const postApiV1AuthRegister = (
+  registerRequest: RegisterRequest,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PostApiV1AuthRegister200>({
+    url: `/api/v1/auth/register`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: registerRequest,
+    signal,
+  });
+};
+
+export const getPostApiV1AuthRegisterMutationOptions = <
+  TError = ErrorType<null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1AuthRegister>>,
+    TError,
+    { data: RegisterRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1AuthRegister>>,
+  TError,
+  { data: RegisterRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiV1AuthRegister"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1AuthRegister>>,
+    { data: RegisterRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1AuthRegister(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1AuthRegisterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1AuthRegister>>
+>;
+export type PostApiV1AuthRegisterMutationBody = RegisterRequest;
+export type PostApiV1AuthRegisterMutationError = ErrorType<null>;
+
+/**
+ * @summary Register a new user
+ */
+export const usePostApiV1AuthRegister = <
+  TError = ErrorType<null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiV1AuthRegister>>,
+      TError,
+      { data: RegisterRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1AuthRegister>>,
+  TError,
+  { data: RegisterRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1AuthRegisterMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
