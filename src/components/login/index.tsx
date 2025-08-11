@@ -5,32 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import {  signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LoginPage() {
   const { register, handleSubmit } = useForm({
     defaultValues: async () => {
       return {
         email: "v7@yopmail.com",
-        password: "Test@123"
+        password: "Test@123",
       };
     },
   });
 
+  const router = useRouter();
+
+  const [error, setError] = useState<string | null>(null);
   const onSubmit = async (data: any) => {
     const result = await signIn("credentials", {
       email: data.email,
       password: data.password,
-      callbackUrl: "/dashboard",
+      redirect: false,
+      // callbackUrl: "/dashboard",
     });
 
-    console.log("Login result:", result);
+    if (!result?.error) {
+      router.replace("/dashboard");
+    }
 
-    // if (result?.ok) {
-    //   // router.push("/dashboard")
-    // } else {
-    //   console.error("Login failed:", result?.error)
-    // }
+    setError(String(result?.error));
+    console.log("Login result:", result);
   };
 
   return (
@@ -55,9 +60,14 @@ export default function LoginPage() {
             <h1 className="text-2xl font-semibold text-gray-900 mb-8">Login</h1>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* <input type="hidden" {...register("csrfToken")} /> */}
+          {/* Display error message if error=CredentialsSignin */}
+          {error === "CredentialsSignin" && (
+            <div className="text-red-600 text-sm text-center">
+              Invalid email or password. Please try again.
+            </div>
+          )}
 
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Input
                 id="email"

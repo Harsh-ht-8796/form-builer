@@ -1,5 +1,5 @@
 import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { token } from '../constant';
+import { getSession } from 'next-auth/react';
 
 // Create instance
 export const AXIOS_INSTANCE = Axios.create({
@@ -9,11 +9,12 @@ export const AXIOS_INSTANCE = Axios.create({
 // Add request interceptor
 AXIOS_INSTANCE.interceptors.request.use(
   //@ts-ignore
-  (config: AxiosRequestConfig) => {
+  async (config: AxiosRequestConfig) => {
     // Example: Add auth token if needed
-
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const session = await getSession(); // Get the session using the NextAuth.js getSession helper
+    console.log("Session in middleware:", session);
+    if (session?.user?.accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${session?.user?.accessToken}`;
     }
     console.log('[Request]', config);
     return config;
@@ -39,6 +40,7 @@ AXIOS_INSTANCE.interceptors.response.use(
 
 export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
   const source = Axios.CancelToken.source();
+  
   const promise = AXIOS_INSTANCE({ ...config, cancelToken: source.token }).then(
     ({ data }) => data,
   );

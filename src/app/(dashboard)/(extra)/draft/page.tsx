@@ -1,6 +1,9 @@
 "use client";
 
-import { getGetApiV1FormsSearchQueryKey, useGetApiV1FormsSearch } from "@/api/formAPI";
+import {
+  getGetApiV1FormsSearchQueryKey,
+  useGetApiV1FormsSearch,
+} from "@/api/formAPI";
 import { DataTable } from "@/components/forms-table";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -42,12 +45,14 @@ export default function DraftFormsPage() {
     status: GetApiV1FormsSearchStatus.draft,
     isActive: true,
     limit: 10,
-    page: 0
+    page: 0,
   });
 
   // Separate state for UI filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">(
+    "all"
+  );
   const [dateRange, setDateRange] = useState<DateRange>({
     from: null,
     to: null,
@@ -61,7 +66,7 @@ export default function DraftFormsPage() {
     () =>
       debounce((term: string) => {
         setQueryParams((prev) => {
-          console.log({ term })
+          console.log({ term });
           return {
             ...prev,
             title: term, // only add title if term is truthy
@@ -77,7 +82,9 @@ export default function DraftFormsPage() {
       debounce((range: DateRange) => {
         setQueryParams((prev) => ({
           ...prev,
-          fromDate: range.from ? moment(range.from).format("DD-MM-YYYY") : undefined,
+          fromDate: range.from
+            ? moment(range.from).format("DD-MM-YYYY")
+            : undefined,
           toDate: range.to ? moment(range.to).format("DD-MM-YYYY") : undefined,
         }));
       }, 300),
@@ -88,7 +95,7 @@ export default function DraftFormsPage() {
   const handleSearchTermChange = useCallback(
     (term: string) => {
       setSearchTerm(term);
-      console.log(term)
+      console.log(term);
       debouncedUpdateSearchTerm(term);
     },
     [debouncedUpdateSearchTerm]
@@ -113,8 +120,10 @@ export default function DraftFormsPage() {
 
   // Invalidate query when queryParams changes
   useEffect(() => {
-    console.log(queryParams)
-    queryClient.invalidateQueries({ queryKey: [...getGetApiV1FormsSearchQueryKey(queryParams)] });
+    console.log(queryParams);
+    queryClient.invalidateQueries({
+      queryKey: [...getGetApiV1FormsSearchQueryKey(queryParams)],
+    });
   }, [queryClient, queryParams]);
 
   // Fetch data using consolidated query parameters
@@ -123,9 +132,8 @@ export default function DraftFormsPage() {
   const filteredData = useCallback(() => {
     console.log({ docs: forms?.docs });
     return forms?.docs?.filter((form) => {
-      const matchesSearch = form.title
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ?? false;
+      const matchesSearch =
+        form.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
 
       const matchesStatus =
         statusFilter === "all" ||
@@ -136,9 +144,7 @@ export default function DraftFormsPage() {
       const matchesDate =
         !dateRange.from ||
         !dateRange.to ||
-        (formDate &&
-          formDate >= dateRange.from &&
-          formDate <= dateRange.to);
+        (formDate && formDate >= dateRange.from && formDate <= dateRange.to);
 
       return matchesSearch && matchesStatus && matchesDate;
     });
@@ -148,11 +154,14 @@ export default function DraftFormsPage() {
 
   const onChangeStatus = (status: string) => {
     setStatusFilter(status as "all" | "true" | "false");
-    setQueryParams((prevState:any) => {
-      const { isActive, ...rest } = prevState
-      return { ...rest, ...(status !== "all" && { isActive: status === "true" }) }
-    })
-  }
+    setQueryParams((prevState: any) => {
+      const { isActive, ...rest } = prevState;
+      return {
+        ...rest,
+        ...(status !== "all" && { isActive: status === "true" }),
+      };
+    });
+  };
   const columns = [
     {
       accessorKey: "title",

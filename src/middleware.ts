@@ -1,21 +1,17 @@
-"use server";
-import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/auth";
+import { NextRequest, NextResponse } from "next/server"
+import authConfig from "./auth.config"
+import NextAuth from "next-auth"
+import { getToken } from "next-auth/jwt"
 
-export async function middleware(request: NextRequest) {
-  const session = await auth();
-  console.log("Session in middleware:", session);
-  return session ? NextResponse.next() : NextResponse.redirect(new URL("/auth/login", request.url));
- }
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-  ],
-};
+// Use only one of the two middleware options below
+// 1. Use middleware directly
+// export const { auth: middleware } = NextAuth(authConfig)
+ 
+// 2. Wrapped middleware option
+const { auth } = NextAuth(authConfig)
+export default auth(async function middleware(req: NextRequest) {
+  // Your custom middleware logic goes here
+  const decoded = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  console.log("Middleware called", decoded)
+  return NextResponse.next()
+})
