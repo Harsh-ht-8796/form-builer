@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 
 export default function FormBuilderPage() {
   const { id } = useParams();
+
+  console.log({ id });
   const formId = Array.isArray(id) ? id[0] : id;
   // const { data: form } = useGetApiV1FormsId(id as string, {
   //   query: {
@@ -12,7 +14,5 @@ export default function FormBuilderPage() {
   //   }
   // })
   // console.log(form);
-  return (
-    <FormBuilderComponent id={formId || ''} />
-  );
+  return <FormBuilderComponent id={formId || ""} />;
 }

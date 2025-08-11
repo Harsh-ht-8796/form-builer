@@ -4,11 +4,10 @@ import {  useState } from "react";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import type { Form, FormField, FormFieldType, FormRequest } from "@/api/model";
 import axios from "axios";
-import { token } from "@/api/constant";
 import { ButtonLists } from "@/types/dashboard/components/form-builder";
 import {
-  usePostApiV1Forms,
   usePostApiV1FormsUploadImagesId,
+  usePutApiV1FormsId,
 } from "@/api/formAPI";
 import { questionTypes } from "@/constants/question-types";
 import { FormTitle } from "./form-title";
@@ -132,7 +131,7 @@ export default function FormBuilder({ id }: { id: string }) {
     background: true,
   });
 
-  const { mutateAsync: addForm } = usePostApiV1Forms();
+  const { mutateAsync: updateForm } = usePutApiV1FormsId();
   const router = useRouter();
 
   const selectedTheme = watch("selectedTheme");
@@ -250,10 +249,11 @@ export default function FormBuilder({ id }: { id: string }) {
       },
       status: "draft",
     };
-    const response = await addForm({
+    const response = await updateForm({
+      id,
       data: formData,
     });
-    router.push(`/`);
+    router.push(`/draft`);
     console.log("Form JSON:", JSON.stringify(response, null, 2));
   };
 
