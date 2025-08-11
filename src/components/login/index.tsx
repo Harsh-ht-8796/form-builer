@@ -5,12 +5,23 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { useForm } from "react-hook-form"
+import { signIn } from "next-auth/react"
 
 export default function LoginPage() {
   const { register, handleSubmit } = useForm()
 
-  const onSubmit = (data:any) => {
-    console.log(data)
+  const onSubmit = async (data: any) => {
+    try {
+      // You can add your own login logic here, e.g., API call to authenticate user
+      await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      })
+      console.log("Login data:", data)
+    } catch (error) {
+      console.error("Login error:", error)
+    }
     // Add your login logic here
   }
 
