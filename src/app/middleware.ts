@@ -1,10 +1,10 @@
-import type { NextRequest } from "next/server";
-import { auth0 } from "@/lib/auth0";
+import { NextResponse, type NextRequest } from "next/server";
+import { auth } from "@/auth";
 
 export async function middleware(request: NextRequest) {
-  const response = await auth0.middleware(request);
-  console.log(response);
-  return response;
+  const session = await auth();
+  console.log("Session in middleware:", session);
+  return session ? NextResponse.next() : NextResponse.redirect(new URL("/auth/login", request.url));
 }
 
 export const config = {

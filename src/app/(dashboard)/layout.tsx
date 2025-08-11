@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { logout } from "@/lib/actions/auth";
 
 export default function DashboardLayout({
   children,
@@ -35,6 +36,11 @@ export default function DashboardLayout({
   const router = useRouter();
 
   const pathname = usePathname();
+
+
+  const handleLogout = async () => {
+    logout()
+  }
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -65,7 +71,7 @@ export default function DashboardLayout({
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           {index <
-                          pathname?.split("/").filter(Boolean).length - 1 ? (
+                            pathname?.split("/").filter(Boolean).length - 1 ? (
                             <BreadcrumbSeparator className="" />
                           ) : null}
                         </Fragment>
@@ -102,7 +108,7 @@ export default function DashboardLayout({
                   <DropdownMenuItem onClick={() => router.push("/profile")}>
                     Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/login")}>
+                  <DropdownMenuItem onClick={handleLogout}>
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>

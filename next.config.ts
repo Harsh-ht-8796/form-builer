@@ -26,9 +26,6 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  experimental: {
-    ppr:true, // Enable Partial Prerendering
-  },
   async rewrites() {
     return [
       { source: '/api/auth/:path*', destination: '/api/auth/:path*' },
