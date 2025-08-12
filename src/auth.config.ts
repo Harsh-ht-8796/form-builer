@@ -185,7 +185,7 @@ export default {
         }),
     ],
     pages: {
-        
+
         signIn: "/auth/login", // Displayed when no user is authenticated
         signOut: "/auth/logout", // Displayed when user signs out
         error: "/auth/error", // Error code passed in query string as ?error=
@@ -208,15 +208,12 @@ export default {
             }
             return token;
         },
-        redirect(params) {
-            const { url, baseUrl } = params;
-            // If the URL is an absolute URL, return it as is
-            if (url.startsWith("http")) {
-                return url;
-            }
-            // Otherwise, return the base URL with the path appended
-            return baseUrl + url;
+        async redirect({ url, baseUrl }) {
+            return url.startsWith(baseUrl)
+                ? Promise.resolve(url)
+                : Promise.resolve(baseUrl);
         },
+        
         session({ session, token, user }) {
 
             if (token) {
@@ -230,6 +227,7 @@ export default {
             }
             return session;
         },
+
     },
 
     secret: process.env.AUTH_SECREAT,

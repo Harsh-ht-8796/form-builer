@@ -2,7 +2,9 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   api: {
-    input: '../src/api-docs/swagger.json',  // path to your Swagger JSON
+    input: {
+      target: "../src/api-docs/swagger.json"
+    },
     output: {
       target: 'api/',           // generated SDK location
       schemas: 'api/model',

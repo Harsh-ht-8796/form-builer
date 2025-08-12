@@ -702,7 +702,7 @@
       "post": {
         "summary": "Register a new user",
         "description": "Creates a new user account with email, username, password, and roles.",
-        "tags": ["Auth"],
+        "tags": ["Auth","Open"],
         "requestBody": {
           "required": true,
           "content": {
