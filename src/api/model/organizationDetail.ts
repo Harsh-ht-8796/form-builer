@@ -6,15 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface User {
-  _id?: string;
-  email?: string;
-  username?: string;
-  profileUrl?: string;
-  orgId?: string;
-  isEmailVerified?: boolean;
-  roles?: string[];
-  __v?: number;
+export interface OrganizationDetail {
+  name?: string;
+  locality?: string;
+  createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
+  id?: string;
 }

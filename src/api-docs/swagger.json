@@ -28,6 +28,18 @@
               "$ref": "#/components/schemas/FormField"
             }
           },
+          "allowedDomains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowedEmails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -63,6 +75,27 @@
             "type": "integer"
           }
         }
+      },
+      "InvitedUser": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "super_admin"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "roles"
+        ]
       },
       "FormField": {
         "type": "object",
@@ -121,8 +154,8 @@
           "backgroundColor": {
             "type": "string"
           },
-          "headerImage":{
-            "type":"string"
+          "headerImage": {
+            "type": "string"
           },
           "emailNotifications": {
             "type": "array",
@@ -248,8 +281,8 @@
             },
             "description": "List of form fields"
           },
-          "order":{
-            "type":"integer"
+          "order": {
+            "type": "integer"
           },
           "settings": {
             "type": "object",
@@ -307,22 +340,77 @@
             }
           }
         },
-        "required": ["email", "password", "username", "roles"]
+        "required": [
+          "email",
+          "password",
+          "username",
+          "roles"
+        ]
       },
       "User": {
         "type": "object",
         "properties": {
-          "username": { "type": "string", "example": "john2" },
-          "email": { "type": "string", "example": "v8@yopmail.com" },
-          "orgId": { "type": "string", "example": null },
-          "isEmailVerified": { "type": "boolean", "example": false },
+          "_id": {
+            "type": "string",
+            "example": "689b4059fdd7aeff7cace044"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "feboj43260@gufutu.com"
+          },
+          "username": {
+            "type": "string"
+          },
+          "profileUrl": {
+            "type": "string"
+          },
+          "orgId": {
+            "type": "string",
+            "example": "6874e0e894418fbbe607bce2"
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "example": false
+          },
           "roles": {
             "type": "array",
-            "items": { "type": "string", "example": "super_admin" }
+            "items": {
+              "type": "string",
+              "example": "super_admin"
+            }
           },
-          "createdAt": { "type": "string", "format": "date-time", "example": "2025-08-11T14:09:23.179Z" },
-          "updatedAt": { "type": "string", "format": "date-time", "example": "2025-08-11T14:09:23.179Z" },
-          "id": { "type": "string", "example": "6899f99319df009f1b9056c4" }
+          "__v": {
+            "type": "integer",
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "12-08-2025"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "12-08-2025"
+          }
+        }
+      },
+      "UsersByOrgResponse": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "object",
+            "properties": {
+              "docs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "meta": {
+                "$ref": "#/components/schemas/PaginationMeta"
+              }
+            }
+          }
         }
       },
       "AccessToken": {
@@ -354,9 +442,155 @@
       "Tokens": {
         "type": "object",
         "properties": {
-          "access": { "$ref": "#/components/schemas/AccessToken" },
-          "refresh": { "$ref": "#/components/schemas/RefreshToken" }
+          "access": {
+            "$ref": "#/components/schemas/AccessToken"
+          },
+          "refresh": {
+            "$ref": "#/components/schemas/RefreshToken"
+          }
         }
+      },
+      "UserInviteRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "roles"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john9.doe@example.com"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "super_admin"
+            }
+          }
+        }
+      },
+      "UserInviteResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "User successfully inviated"
+          }
+        }
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "admin"
+          },
+          "label": {
+            "type": "string",
+            "example": "Admin"
+          }
+        }
+      },
+      "UserRolesResponse": {
+        "type": "object",
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            }
+          }
+        }
+      },
+      "DeleteUserResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "User deleted successfully"
+          }
+        }
+      },
+      "OrganizationDetail": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "kufyopudre"
+          },
+          "locality": {
+            "type": "string",
+            "example": "harshvardhant88@heaptrace.com"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "689afc8b62b3b34c8e69cfea"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-12T08:34:28.625Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-12T08:34:28.625Z"
+          },
+          "id": {
+            "type": "string",
+            "example": "689afc9462b3b34c8e69cfef"
+          }
+        }
+      },
+      "GetOrganizationByIdResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "kufyopudre"
+          },
+          "locality": {
+            "type": "string",
+            "example": "harshvardhant88@heaptrace.com"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "689afc8b62b3b34c8e69cfea"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-12T08:34:28.625Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-12T08:34:28.625Z"
+          },
+          "id": {
+            "type": "string",
+            "example": "689afc9462b3b34c8e69cfef"
+          }
+        }
+      },
+      "OrganizationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Acme Corp1"
+          },
+          "locality": {
+            "type": "string",
+            "example": "New York1"
+          }
+        },
+        "required": [
+          "name",
+          "locality"
+        ]
       }
     }
   },
@@ -625,7 +859,9 @@
       "post": {
         "summary": "Upload cover and logo images",
         "description": "Uploads one or both images (`coverImage`, `logoImage`) to a form by ID. Accepts multipart/form-data.",
-        "tags": ["Forms"],
+        "tags": [
+          "Forms"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -702,7 +938,10 @@
       "post": {
         "summary": "Register a new user",
         "description": "Creates a new user account with email, username, password, and roles.",
-        "tags": ["Auth","Open"],
+        "tags": [
+          "Auth",
+          "Open"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -721,8 +960,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "user": { "$ref": "#/components/schemas/User" },
-                    "tokens": { "$ref": "#/components/schemas/Tokens" }
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "tokens": {
+                      "$ref": "#/components/schemas/Tokens"
+                    }
                   }
                 }
               }
@@ -730,6 +973,398 @@
           },
           "400": {
             "description": "Invalid input or missing fields"
+          }
+        }
+      }
+    },
+    "/api/v1/users/roles": {
+      "get": {
+        "summary": "Get available user roles",
+        "responses": {
+          "200": {
+            "description": "List of available roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRolesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/user-invite": {
+      "post": {
+        "summary": "Invite users to an organization",
+        "description": "Allows an organization admin to invite one or more users by email and assign roles.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "users": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/InvitedUser"
+                    }
+                  }
+                },
+                "required": [
+                  "users"
+                ]
+              },
+              "example": {
+                "users": [
+                  {
+                    "email": "john23.doe@example.com",
+                    "roles": [
+                      "super_admin"
+                    ]
+                  },
+                  {
+                    "email": "john24.doe@example.com",
+                    "roles": [
+                      "super_admin"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Users invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "users": [
+                    {
+                      "email": "john23.doe@example.com",
+                      "roles": [
+                        "super_admin"
+                      ]
+                    },
+                    {
+                      "email": "john24.doe@example.com",
+                      "roles": [
+                        "super_admin"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid email format or missing fields"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        }
+      }
+    },
+    "/api/v1/users/by-org": {
+      "get": {
+        "summary": "Get users by organization",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "feboj43260"
+            },
+            "description": "Filter users by partial or full email address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users in the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersByOrgResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "delete": {
+        "summary": "Delete a user",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "689b3bf20c17e409fbe1919a"
+            },
+            "description": "The ID of the user to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get user details by ID",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "689b4059fdd7aeff7cace044"
+            },
+            "description": "The ID of the user to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "summary": "Get user details by ID",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "689b4059fdd7aeff7cace044"
+            },
+            "description": "The ID of the user to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Get user details by ID",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations": {
+      "put": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Update Organization",
+        "description": "Updates the details of an existing organization.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganizationUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organization updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/me": {
+      "get": {
+        "summary": "Get organization details by ID",
+        "tags": [
+          "Organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganizationByIdResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "404": {
+            "description": "Organization not found"
+          }
+        }
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "summary": "Get current authenticated user's profile",
+        "description": "Returns the profile details of the currently authenticated user.",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "username": "YourName5",
+                  "email": "v7@yopmail.com",
+                  "isEmailVerified": false,
+                  "profileUrl": "/uploads/1755070693861-7s4t5o.png",
+                  "roles": [
+                    "super_admin"
+                  ],
+                  "createdAt": "2025-07-14T07:51:21.639Z",
+                  "updatedAt": "2025-08-13T08:06:19.343Z",
+                  "orgId": "6874e0e894418fbbe607bce2",
+                  "id": "6874b6f9ae642cd5c190146f"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
           }
         }
       }

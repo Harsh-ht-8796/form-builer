@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
-import { organizationData } from "@/components/dashboard/data";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/forms-table";
 import { Edit2, Pencil, Plus } from "lucide-react";
@@ -26,78 +25,152 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  getGetApiV1UsersByOrgQueryKey,
+  useDeleteApiV1UsersId,
+  useGetApiV1UsersByOrg,
+  useGetApiV1UsersRoles,
+  usePostApiV1OrganizationsUserInvite,
+} from "@/api/formAPI";
+import { debounce } from "lodash";
+import { useQueryClient } from "@tanstack/react-query";
 
-const ROLE = [
-  {
-    id: 1,
-    value: "admin",
-    label: "Admin",
-  },
-  {
-    id: 2,
-    value: "member",
-    label: "Member",
-  },
-];
-
-const columns = [
-  {
-    accessorKey: "name",
-    header: "Full Name",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "role",
-    header: "Role",
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    meta: {
-      headerClassName: "text-center",
-    },
-    cell: () => (
-      <div className="flex justify-center items-center gap-2">
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <Pencil className="h-4 w-4 text-gray-500" />
-        </Button>
-        <Button variant="ghost" size="icon">
-          <TfiTrash className="h-4 w-4 text-gray-500" />
-        </Button>
-      </div>
-    ),
-  },
-];
-
-interface TeamMember {
- 
-  email: string;
-  role: string
- 
+enum Role {
+  admin = "super_admin",
+  member = "member",
 }
 
+// Define interfaces for form data
+interface TeamMember {
+  email: string;
+  role: string;
+}
+
+interface OrgFormData {
+  name: string;
+  locality: string;
+}
+
+interface QueryParams {
+  email?: string;
+  limit?: number;
+  page?: number;
+}
+
+
 export default function Organization() {
-  const filteredData = organizationData;
+
+  const { mutateAsync: deleteUser } = useDeleteApiV1UsersId()
+  const columns = [
+    {
+      accessorKey: "name",
+      header: "Full Name",
+    },
+    {
+      accessorKey: "_id",
+      header: "_id",
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      accessorKey: "roles",
+      header: "Role",
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      meta: {
+        headerClassName: "text-center",
+      },
+      cell: ({ row }: any) => {
+        console.log(row.getValue("_id"));
+        const id = row.getValue("_id");
+        return (<div className="flex justify-center items-center gap-2">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Pencil className="h-4 w-4 text-gray-500" />
+          </Button>
+          <Button onClick={() => handleDeleteUser(id)} variant="ghost" size="icon">
+            <TfiTrash className="h-4 w-4 text-gray-500" />
+          </Button>
+        </div>)
+      }
+      ,
+    },
+  ];
 
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [addedMembers, setAddedMembers] = useState<TeamMember[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [queryParams, setQueryParams] = useState<QueryParams>({
+    limit: 10,
+    page: 0,
+  });
+
+  const { data: allroles } = useGetApiV1UsersRoles();
+  const { mutateAsync: inviteUsers } = usePostApiV1OrganizationsUserInvite();
+  const { data: usersData } = useGetApiV1UsersByOrg(queryParams);
+  const queryClient = useQueryClient();
+
+  const handleDeleteUser = async (id: string) => {
+    await deleteUser({
+      id
+    })
+
+    queryClient.invalidateQueries({
+      queryKey: [...getGetApiV1UsersByOrgQueryKey(queryParams)],
+    });
+  }
+
+  // Debounced function to update queryParams.email
+  const debouncedUpdateSearchTerm = useMemo(
+    () =>
+      debounce((term: string) => {
+        setQueryParams((prev) => ({
+          ...prev,
+          email: term || undefined, // Only add email if term is truthy
+        }));
+      }, 300),
+    []
+  );
+
+  // Handle search term input changes
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const term = e.target.value;
+      setSearchTerm(term);
+      debouncedUpdateSearchTerm(term);
+    },
+    [debouncedUpdateSearchTerm]
+  );
+
+  // Clean up debounced function on component unmount
+  useEffect(() => {
+    return () => {
+      debouncedUpdateSearchTerm.cancel();
+    };
+  }, [debouncedUpdateSearchTerm]);
+
+  // Invalidate query when queryParams changes
+  useEffect(() => {
+    queryClient.invalidateQueries({
+      queryKey: [...getGetApiV1UsersByOrgQueryKey(queryParams)],
+    });
+  }, [queryClient, queryParams]);
 
   // Form for adding members
-  const memberForm = useForm({
+  const memberForm = useForm<TeamMember>({
     defaultValues: {
       email: "",
-      role: "1",
+      role: Role.admin.toString(),
     },
   });
   const { register: registerMember, control: controlMember, reset: resetMember, getValues: getMemberValues } = memberForm;
 
   // Form for editing organization
-  const orgForm = useForm({
+  const orgForm = useForm<OrgFormData>({
     defaultValues: {
       name: "",
       locality: "",
@@ -108,7 +181,7 @@ export default function Organization() {
   // Reset member form and added members when dialog opens
   useEffect(() => {
     if (isAddMemberModalOpen) {
-      resetMember({ email: "", role: "1" });
+      resetMember({ email: "", role: Role.admin.toString() });
       setAddedMembers([]);
     }
   }, [isAddMemberModalOpen, resetMember]);
@@ -116,29 +189,37 @@ export default function Organization() {
   // Function to add a member
   const addMember = () => {
     const currentData = getMemberValues();
-    setAddedMembers([...addedMembers, currentData]);
-    resetMember({ email: "", role: "" });
+    if (currentData.email && currentData.role) {
+      setAddedMembers([...addedMembers, currentData]);
+      resetMember({ email: "", role: Role.admin.toString() });
+    }
   };
 
   // Function to handle "Done" button in add member dialog
-  const handleAddMemberSubmit = () => {
-    console.log("Added members:", addedMembers);
+  const handleAddMemberSubmit = async () => {
+    const updateRoles = addedMembers.map((member) => ({
+      email: member.email,
+      roles: [member.role],
+    }));
+    await inviteUsers({ data: { users: updateRoles } }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [...getGetApiV1UsersByOrgQueryKey(queryParams)],
+        });
+      }
+    });
     setIsAddMemberModalOpen(false);
   };
 
   // Function to handle organization edit form submission
-  const onOrgSubmit = (data: any) => {
+  const onOrgSubmit = (data: OrgFormData) => {
     console.log("Saved organization:", data);
     setIsModalOpen(false);
   };
 
-  const handleSearchChange = (e: any) => {
-    setSearchTerm(e.target.value);
-  };
-
   return (
     <>
-      {filteredData.length > 0 ? (
+      {(
         <div className="min-h-screen">
           <div className="mx-auto">
             <Card className="bg-white">
@@ -162,9 +243,11 @@ export default function Organization() {
 
                   <div className="flex items-center gap-2">
                     <Input
-                      placeholder="Search..."
+                      placeholder="Search by email..."
                       value={searchTerm}
+                      name="email-search"
                       onChange={handleSearchChange}
+                      className="w-full sm:w-64"
                     />
                     <Dialog
                       open={isAddMemberModalOpen}
@@ -182,11 +265,11 @@ export default function Organization() {
                           </DialogTitle>
                         </DialogHeader>
 
-                        <div className="space-y-2 flex flex-row gap-2">
+                        <div className="space-y-2 flex flex-col gap-2">
                           <div className="flex flex-row gap-2">
                             <Input
                               placeholder="Email"
-                              {...registerMember("email")}
+                              {...registerMember("email", { required: true })}
                             />
                             <Controller
                               name="role"
@@ -200,10 +283,10 @@ export default function Organization() {
                                     <SelectValue placeholder="Role" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {ROLE.map((role) => (
+                                    {allroles?.roles?.map((role) => (
                                       <SelectItem
-                                        key={role.id}
-                                        value={role.id.toString()}
+                                        key={role.value}
+                                        value={String(role?.value)}
                                       >
                                         {role.label}
                                       </SelectItem>
@@ -214,7 +297,7 @@ export default function Organization() {
                             />
                             <Button
                               onClick={addMember}
-                              className="bg-[#F3E8FF] hover:bg-[#F3E8FF]/80 text-[] px-6 py-2"
+                              className="bg-[#F3E8FF] hover:bg-[#F3E8FF]/80 text-black px-6 py-2"
                             >
                               Add
                             </Button>
@@ -228,7 +311,7 @@ export default function Organization() {
                             >
                               <div className="flex items-center">
                                 <div className="flex flex-1 items-center min-w-6 h-6 justify-center bg-[#F3E8FF] rounded-full size-6">
-                                  {member.email.at(0)}
+                                  {member.email.charAt(0)}
                                 </div>
                                 <div className="flex-2 truncate">
                                   {member.email}
@@ -238,6 +321,11 @@ export default function Organization() {
                                     variant="ghost"
                                     size="icon"
                                     className="ml-auto"
+                                    onClick={() =>
+                                      setAddedMembers(
+                                        addedMembers.filter((_, i) => i !== index)
+                                      )
+                                    }
                                   >
                                     <MdClose className="size-4" />
                                   </Button>
@@ -259,7 +347,33 @@ export default function Organization() {
                   </div>
                 </div>
 
-                <DataTable columns={columns} data={filteredData} />
+                {usersData?.users?.docs && usersData?.users?.docs?.length > 0 ?
+                  <DataTable columns={columns}
+                    initialState={{
+                      columnVisibility: {
+                        _id: false,
+                      },
+                    }}
+                    data={usersData?.users.docs || []}
+                  /> :
+
+
+                  (<div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                    <div className="text-center">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-200 rounded-lg mb-6">
+                        <Plus className="w-8 h-8 text-purple-600" strokeWidth={3} />
+                      </div>
+                      <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                        Add Member
+                      </h2>
+                      <p className="text-gray-500 text-base max-w-sm">
+                        Add member in your organization for Connectivity
+                      </p>
+                    </div>
+                  </div>)
+
+                }
+
               </CardContent>
             </Card>
           </div>
@@ -284,7 +398,7 @@ export default function Organization() {
                       id="name"
                       placeholder="Organization"
                       className="w-full"
-                      {...registerOrg("name")}
+                      {...registerOrg("name", { required: true })}
                     />
                   </div>
 
@@ -299,7 +413,7 @@ export default function Organization() {
                       id="locality"
                       placeholder="Enter Locality"
                       className="w-full"
-                      {...registerOrg("locality")}
+                      {...registerOrg("locality", { required: true })}
                     />
                   </div>
 
@@ -313,20 +427,6 @@ export default function Organization() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
-      ) : (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-200 rounded-lg mb-6">
-              <Plus className="w-8 h-8 text-purple-600" strokeWidth={3} />
-            </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Add Member
-            </h2>
-            <p className="text-gray-500 text-base max-w-sm">
-              Add member in your organization for Connectivity
-            </p>
-          </div>
         </div>
       )}
     </>

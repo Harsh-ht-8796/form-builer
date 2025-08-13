@@ -39,7 +39,7 @@ interface QueryParams {
   title?: string;
   fromDate?: string;
   toDate?: string;
-  mode?: string;  
+  mode?: string;
 }
 
 export default function SentFormsPage() {
@@ -191,8 +191,28 @@ export default function SentFormsPage() {
       header: "_id",
     },
     {
+      accessorKey: "allowedDomains",
+      header: "Sent To",
+    },
+
+    {
+      accessorKey: "allowedEmails",
+      header: "Sent To",
+    },
+
+    {
       accessorKey: "sentTo",
       header: "Sent To",
+      cell: ({ row }: any) => {
+        const allowedEmails = row.getValue("allowedEmails");
+        const allowedDomains = row.getValue("allowedDomains");
+        return (
+          <div className="flex items-center gap-4">
+            {allowedEmails.length > 1 ? allowedEmails.at(0) + " + 1" : allowedEmails.at(0)}
+            {allowedDomains.length > 1 ? allowedDomains.at(0) + " + 1" : allowedDomains.at(0)}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "createdAt",
@@ -205,35 +225,7 @@ export default function SentFormsPage() {
     },
     {
       accessorKey: "status",
-      header: "Status",
-      cell: ({ row }: any) => {
-        const status = row.getValue("status");
-        return (
-          <div className="flex items-center gap-4">
-            <div
-              className={cn(
-                "flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-full",
-                {
-                  "bg-green-100 text-green-800": status === "Active",
-                  "bg-red-100 text-red-800": status === "Closed",
-                }
-              )}
-            >
-              <span
-                className={cn("w-2 h-2 rounded-full", {
-                  "bg-green-500": status === "Active",
-                  "bg-red-500": status === "Closed",
-                })}
-              ></span>
-              {status}
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "dateSent",
-      header: "Date Sent",
+      header: "Status"
     },
     {
       accessorKey: "action",
@@ -321,6 +313,8 @@ export default function SentFormsPage() {
               columnVisibility: {
                 _id: false,
                 id: false,
+                allowedEmails: false,
+                allowedDomains: false
               },
             }}
             data={forms?.docs || []}

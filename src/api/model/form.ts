@@ -15,6 +15,8 @@ export interface Form {
   isActive?: boolean;
   createdBy?: string;
   fields?: FormField[];
+  allowedDomains?: string[];
+  allowedEmails?: string[];
   createdAt?: string;
   updatedAt?: string;
   settings?: FormSettings;

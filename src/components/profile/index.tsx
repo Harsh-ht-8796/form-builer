@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,42 +21,163 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
+import {
+  useGetApiV1UsersMe,
+  useGetApiV1OrganizationsMe,
+  usePutApiV1Users,
+  usePutApiV1Organizations,
+  getGetApiV1UsersMeQueryKey,
+  getGetApiV1OrganizationsMeQueryKey,
+} from "@/api/formAPI";
+import { useQueryClient } from "@tanstack/react-query";
+
+interface ProfileFormData {
+  username: string;
+  email: string;
+  role: string;
+  organization: string;
+  locality: string;
+  profileUrl: string;
+}
+
+interface PasswordFormData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
 
 export default function ProfileComponent() {
-  const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Wick",
-    email: "john@example.com",
-    role: "Admin",
-    organization: "",
-    locality: "",
+  const { data: userData, isLoading: isUserLoading } = useGetApiV1UsersMe();
+  const { data: orgData, isLoading: isOrgLoading } = useGetApiV1OrganizationsMe();
+  const { mutateAsync: updateUserDetails } = usePutApiV1Users();
+  const { mutateAsync: updateOrgDetails } = usePutApiV1Organizations();
+  const queryClient = useQueryClient();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch: userWatch,
+    reset: resetProfile,
+    formState: { errors: profileErrors },
+  } = useForm<ProfileFormData>({
+    defaultValues: {
+      username: "",
+      email: "",
+      role: "super_admin",
+      organization: "",
+      locality: "",
+      profileUrl: "",
+    },
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  const {
+    register: registerPassword,
+    handleSubmit: handlePasswordSubmit,
+    watch,
+    reset: resetPassword,
+    formState: { errors: passwordErrors },
+  } = useForm<PasswordFormData>({
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
   });
+
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData((prev) => ({ ...prev, [field]: value }));
+
+  // Update form values when API data is loaded
+  useEffect(() => {
+    if (userData && orgData) {
+      setValue("username", userData?.username || "");
+      setValue("email", userData?.email || "");
+      setValue(
+        "profileUrl",
+        userData?.profileUrl
+          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileUrl}`
+          : ""
+      );
+      setValue("role", userData?.roles?.[0] || "super_admin");
+      setValue("organization", orgData?.name || "");
+      setValue("locality", orgData?.locality || "");
+    }
+  }, [userData, orgData, setValue]);
+
+  const onSubmit = async (data: ProfileFormData) => {
+    try {
+      // Update organization details
+      await updateOrgDetails(
+        {
+          data: {
+            locality: data.locality,
+            name: data.organization,
+          },
+        },
+        {
+          onSuccess: () => {
+            // Invalidate organization query
+            queryClient.invalidateQueries({
+              queryKey: getGetApiV1OrganizationsMeQueryKey(),
+            });
+            // Update form with new organization data
+            setValue("organization", data.organization);
+            setValue("locality", data.locality);
+          },
+        }
+      );
+
+      // Update user details
+      await updateUserDetails(
+        {
+          data: {
+            username: data.username,
+          },
+        },
+        {
+          onSuccess: () => {
+            // Invalidate user query
+            queryClient.invalidateQueries({
+              queryKey: getGetApiV1UsersMeQueryKey(),
+            });
+            // Update form with new user data
+            setValue("username", data.username);
+          },
+        }
+      );
+
+      console.log("Profile updated:", data);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
-  const handlePasswordSubmit = () => {
-    console.log(passwordData);
+
+  const onPasswordSubmit = (data: PasswordFormData) => {
+    console.log("Password update:", data);
     setIsPasswordModalOpen(false);
+    resetPassword();
+    // Add your API call to update password here
   };
+
+  if (isUserLoading || isOrgLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!userData || !orgData) {
+    return <div>Error: Unable to load profile data</div>;
+  }
+
+  const profileUrl = userWatch("profileUrl");
+
   return (
-    <div className="p-6  min-h-screen rounded-lg bg-white">
+    <div className="p-6 min-h-screen rounded-lg bg-white">
       <h1 className="text-2xl font-semibold text-gray-900 mb-8 col-span-full">
         Profile
       </h1>
 
       <div className="grid grid-cols-2 gap-8">
-        <div className="col-span-1 ">
-          <div className="flex justify-center items-center ">
+        <div className="col-span-1">
+          <div className="flex justify-center items-center">
             <div className="space-y-4">
               <div className="border-2 border-dashed p-4">
                 <div className="flex justify-end items-center">
@@ -67,7 +189,7 @@ export default function ProfileComponent() {
                   </Button>
                 </div>
                 <Avatar className="w-48 h-48 bg-gray-100 border-2">
-                  <AvatarImage src="/placeholder.svg" />
+                  <AvatarImage src={profileUrl ? profileUrl : "/placeholder.svg"} />
                   <AvatarFallback className="bg-gray-200">
                     <User className="w-20 h-20 text-gray-400" />
                   </AvatarFallback>
@@ -89,7 +211,10 @@ export default function ProfileComponent() {
                         Update Password
                       </DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <form
+                      onSubmit={handlePasswordSubmit(onPasswordSubmit)}
+                      className="space-y-4 py-4"
+                    >
                       <div className="space-y-2">
                         <Label
                           htmlFor="currentPassword"
@@ -101,15 +226,16 @@ export default function ProfileComponent() {
                           id="currentPassword"
                           type="password"
                           placeholder="Existing Password"
-                          value={passwordData.currentPassword}
-                          onChange={(e) =>
-                            handlePasswordChange(
-                              "currentPassword",
-                              e.target.value
-                            )
-                          }
+                          {...registerPassword("currentPassword", {
+                            required: "Current password is required",
+                          })}
                           className="w-full"
                         />
+                        {passwordErrors.currentPassword && (
+                          <p className="text-red-500 text-sm">
+                            {passwordErrors.currentPassword.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -119,102 +245,151 @@ export default function ProfileComponent() {
                         <Input
                           type="password"
                           placeholder="Enter New Password"
-                          value={passwordData.newPassword}
-                          onChange={(e) =>
-                            handlePasswordChange("newPassword", e.target.value)
-                          }
+                          {...registerPassword("newPassword", {
+                            required: "New password is required",
+                            minLength: {
+                              value: 8,
+                              message: "Password must be at least 8 characters",
+                            },
+                          })}
                           className="w-full"
                         />
+                        {passwordErrors.newPassword && (
+                          <p className="text-red-500 text-sm">
+                            {passwordErrors.newPassword.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
                         <Input
                           type="password"
                           placeholder="Confirm New Password"
-                          value={passwordData.confirmPassword}
-                          onChange={(e) =>
-                            handlePasswordChange(
-                              "confirmPassword",
-                              e.target.value
-                            )
-                          }
+                          {...registerPassword("confirmPassword", {
+                            required: "Please confirm your new password",
+                            validate: (value) =>
+                              value === watch("newPassword") ||
+                              "Passwords do not match",
+                          })}
                           className="w-full"
                         />
+                        {passwordErrors.confirmPassword && (
+                          <p className="text-red-500 text-sm">
+                            {passwordErrors.confirmPassword.message}
+                          </p>
+                        )}
                       </div>
 
                       <Button
-                        onClick={handlePasswordSubmit}
+                        type="submit"
                         className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 mt-6"
                       >
                         Change Password
                       </Button>
-                    </div>
+                    </form>
                   </DialogContent>
                 </Dialog>
               </div>
             </div>
-            <div className="absolute top-2 right-2 flex gap-1"></div>
           </div>
         </div>
-        <div className="col-span-1 ">
-          <div className="space-y-4 max-w-sm">
+        <div className="col-span-1">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-sm">
             <div className="space-y-2">
-              <Label>First Name</Label>
+              <Label>Username</Label>
               <Input
-                value={formData.firstName}
-                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                {...register("username", { required: "Username is required" })}
               />
-            </div>
-            <div className="space-y-2">
-              <Label>Last Name</Label>
-              <Input
-                value={formData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-              />
+              {profileErrors.username && (
+                <p className="text-red-500 text-sm">
+                  {profileErrors.username.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
               <Input
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                disabled
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Invalid email address",
+                  },
+                })}
               />
+              {profileErrors.email && (
+                <p className="text-red-500 text-sm">
+                  {profileErrors.email.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Role</Label>
               <Select
-                value={formData.role}
-                onValueChange={(value) => handleInputChange("role", value)}
+                disabled
+                onValueChange={(value) => setValue("role", value)}
+                defaultValue={userData?.roles?.[0]}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="User">User</SelectItem>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Organization</Label>
               <Input
-                value={formData.organization}
-                onChange={(e) =>
-                  handleInputChange("organization", e.target.value)
-                }
+                {...register("organization", {
+                  required: "Organization is required",
+                })}
               />
+              {profileErrors.organization && (
+                <p className="text-red-500 text-sm">
+                  {profileErrors.organization.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Locality</Label>
               <Input
-                value={formData.locality}
-                onChange={(e) => handleInputChange("locality", e.target.value)}
+                {...register("locality", { required: "Locality is required" })}
               />
+              {profileErrors.locality && (
+                <p className="text-red-500 text-sm">
+                  {profileErrors.locality.message}
+                </p>
+              )}
             </div>
             <div className="flex justify-space-between gap-2 py-5">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white">Update Profile</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white">Cancel</Button>
+              <Button
+                type="submit"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Update Profile
+              </Button>
+              <Button
+                type="button"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                onClick={() => resetProfile({
+                  username: userData?.username || "",
+                  email: userData?.email || "",
+                  profileUrl: userData?.profileUrl
+                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileUrl}`
+                    : "",
+                  role: userData?.roles?.[0] || "super_admin",
+                  organization: orgData?.name || "",
+                  locality: orgData?.locality || "",
+                })}
+              >
+                Cancel
+              </Button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
