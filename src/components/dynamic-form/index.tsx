@@ -335,7 +335,11 @@ export default function DynamicForm() {
 
         <div className="-mt-12 sm:-mt-16 flex justify-start">
           <Avatar className="size-24 sm:size-28 border-4 border-white shadow-md">
-            <AvatarImage src={dynamicForm?.logoImage || "/placeholder.svg"} />
+            <AvatarImage src={
+              dynamicForm?.logoImage
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${dynamicForm.logoImage}`
+                : "/placeholder.svg"
+            } />
             <AvatarFallback>AC</AvatarFallback>
           </Avatar>
         </div>
