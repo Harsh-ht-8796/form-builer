@@ -7,6 +7,17 @@
   },
   "components": {
     "schemas": {
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        }
+      },
       "Form": {
         "type": "object",
         "properties": {
@@ -354,6 +365,10 @@
             "type": "string",
             "example": "689b4059fdd7aeff7cace044"
           },
+          "id": {
+            "type": "string",
+            "example": "689b4059fdd7aeff7cace044"
+          },
           "email": {
             "type": "string",
             "format": "email",
@@ -362,7 +377,7 @@
           "username": {
             "type": "string"
           },
-          "profileUrl": {
+          "profileImage": {
             "type": "string"
           },
           "orgId": {
@@ -958,15 +973,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "user": {
-                      "$ref": "#/components/schemas/User"
-                    },
-                    "tokens": {
-                      "$ref": "#/components/schemas/Tokens"
-                    }
-                  }
+                  "$ref": "#/components/schemas/RegisterResponse"
                 }
               }
             }
@@ -1365,6 +1372,404 @@
           },
           "401": {
             "description": "Unauthorized - Missing or invalid token"
+          }
+        }
+      }
+    },
+    "/api/v1/users/upload-images": {
+      "post": {
+        "summary": "Upload cover and logo images",
+        "description": "Uploads one or both images (`coverImage`, `logoImage`) to a form by ID. Accepts multipart/form-data.",
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profileImage": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Images uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "profileUrlUrl": {
+                      "type": "string",
+                      "example": "/uploads/1754488521261-hbzaai.png"
+                    },
+                    "profileUrlHash": {
+                      "type": "string",
+                      "example": "501b8bbeb3212286a913c0084c2121a38119acc7daeb24d92e524ff3d5511a85"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No images uploaded or bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/v1/users/delete-profile-image": {
+      "delete": {
+        "summary": "Delete the user's profile image",
+        "description": "Deletes the currently uploaded profile image for the authenticated user.",
+        "responses": {
+          "200": {
+            "description": "Profile image deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Profile image deleted successfully"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "Profile image deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid file or no image found"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        }
+      }
+    },
+    "/api/v1/users/change-password": {
+      "post": {
+        "summary": "Change user password",
+        "description": "Allows the authenticated user to change their password by providing the current password and a new password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "oldPassword": {
+                    "type": "string",
+                    "example": "New@123"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "example": "Test@123"
+                  }
+                },
+                "required": [
+                  "oldPassword",
+                  "newPassword"
+                ]
+              },
+              "example": {
+                "oldPassword": "New@123",
+                "newPassword": "Test@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Password updated successfully"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "Password updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Old password is incorrect or new password doesn't meet requirements"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/{formId}/update-visibility": {
+      "put": {
+        "summary": "Update form visibility and access settings",
+        "description": "Allows updating visibility settings, allowed domains, and allowed emails for a form.",
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "689c40d66bbfbadb9b80d1a6"
+            },
+            "description": "Unique ID of the form to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "visibility": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "private",
+                        "public",
+                        "domain_restricted"
+                      ]
+                    },
+                    "example": [
+                      "private",
+                      "domain_restricted"
+                    ]
+                  },
+                  "allowedEmails": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "example": [
+                      "abc@gmail.com"
+                    ]
+                  },
+                  "allowedDomains": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "example.com"
+                    ]
+                  }
+                },
+                "required": [
+                  "visibility"
+                ]
+              },
+              "example": {
+                "visibility": [
+                  "private",
+                  "domain_restricted"
+                ],
+                "allowedEmails": [
+                  "abc@gmail.com"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Form visibility updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Form"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid form ID or data format"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Form not found"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/{formId}/visibility": {
+      "get": {
+        "summary": "Get form visibility settings",
+        "description": "Retrieves the visibility settings and allowed emails for a specific form.",
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "6874e12cf3ccc5a289e7de96"
+            },
+            "description": "Unique ID of the form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Form visibility retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "visibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private",
+                        "domain_restricted"
+                      ],
+                      "example": "public"
+                    },
+                    "allowedEmails": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "example": []
+                    }
+                  },
+                  "required": [
+                    "visibility",
+                    "allowedEmails"
+                  ]
+                },
+                "example": {
+                  "visibility": "public",
+                  "allowedEmails": []
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Form not found"
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/form/{formId}": {
+      "post": {
+        "summary": "Submit form data",
+        "description": "Allows submission of form responses. The `data` object contains dynamic keys representing field IDs and their corresponding answers.",
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "689da44d618fe88d2779c85e"
+            },
+            "description": "Unique ID of the form being submitted"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "description": "Dynamic object containing form field IDs as keys and user responses as values",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "example": {
+                      "1755161694558": "Option 2"
+                    }
+                  }
+                },
+                "required": [
+                  "data"
+                ]
+              },
+              "example": {
+                "data": {
+                  "1755161694558": "Option 2"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Form submission successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "1755161694558": "Option 2"
+                      }
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                },
+                "example": {
+                  "data": {
+                    "1755161694558": "Option 2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid form data"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Form not found"
           }
         }
       }

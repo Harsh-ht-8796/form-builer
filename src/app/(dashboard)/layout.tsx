@@ -40,6 +40,7 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     logout();
+    router.replace("/auth/login");
   };
   const { data: session, status } = useSession();
 
@@ -82,7 +83,7 @@ export default function DashboardLayout({
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           {index <
-                          pathname?.split("/").filter(Boolean).length - 1 ? (
+                            pathname?.split("/").filter(Boolean).length - 1 ? (
                             <BreadcrumbSeparator className="" />
                           ) : null}
                         </Fragment>
@@ -103,7 +104,9 @@ export default function DashboardLayout({
                   <Avatar className="cursor-pointer">
                     <AvatarImage
                       className="size-8 rounded-full bg-purple-100"
-                      src="https://github.com/shadcn.png"
+                      src={session.user?.profileImage
+                        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${session.user?.profileImage}`
+                        : "https://github.com/shadcn.png"}
                       alt="@shadcn"
                     />
                     <AvatarFallback className="text-purple-700 text-center font-medium">

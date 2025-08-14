@@ -5,12 +5,13 @@ type RequestBody = {
   files?: File[] | Blob[];
   coverImage?: File | Blob;
   logoImage?: File | Blob;
+  profileImage?: File | Blob;
 };
 
 export const customFormData = <BodyType extends RequestBody>(
   body: BodyType,
 ): FormData => {
-  const { files, file, coverImage, logoImage,...rest } = body;
+  const { files, file, coverImage, logoImage, profileImage, ...rest } = body;
   const formData = new FormData();
 
   Object.entries(rest).forEach(([key, value]) => {
@@ -31,6 +32,10 @@ export const customFormData = <BodyType extends RequestBody>(
 
   if (logoImage) {
     formData.append('logoImage', logoImage);
+  }
+
+  if (profileImage) {
+    formData.append('profileImage', profileImage);
   }
 
   return formData;

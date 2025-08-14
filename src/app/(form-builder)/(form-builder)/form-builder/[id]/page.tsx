@@ -14,5 +14,5 @@ export default function FormBuilderPage() {
   //   }
   // })
   // console.log(form);
-  return <FormBuilderComponent id={formId || ""} />;
+  return <FormBuilderComponent/>;
 }

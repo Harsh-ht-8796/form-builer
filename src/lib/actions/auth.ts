@@ -10,8 +10,8 @@ export const login = async () => {
 }
 
 export const logout = async () => {
-    return signOut({
-        redirectTo: "/auth/login"
+    return  await signOut({
+        redirect:false
     });
 }
 

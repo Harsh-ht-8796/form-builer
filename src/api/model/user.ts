@@ -8,9 +8,10 @@
 
 export interface User {
   _id?: string;
+  id?: string;
   email?: string;
   username?: string;
-  profileUrl?: string;
+  profileImage?: string;
   orgId?: string;
   isEmailVerified?: boolean;
   roles?: string[];

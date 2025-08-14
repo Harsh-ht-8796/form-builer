@@ -28,8 +28,13 @@ import {
   usePutApiV1Organizations,
   getGetApiV1UsersMeQueryKey,
   getGetApiV1OrganizationsMeQueryKey,
+  usePostApiV1UsersUploadImages,
+  useDeleteApiV1UsersDeleteProfileImage,
+  usePostApiV1UsersChangePassword,
 } from "@/api/formAPI";
 import { useQueryClient } from "@tanstack/react-query";
+import FileUploadPopup from "../common/file-upload-popup";
+import { uploadFileType } from "@/types/dashboard/components/form-builder";
 
 interface ProfileFormData {
   username: string;
@@ -51,7 +56,10 @@ export default function ProfileComponent() {
   const { data: orgData, isLoading: isOrgLoading } = useGetApiV1OrganizationsMe();
   const { mutateAsync: updateUserDetails } = usePutApiV1Users();
   const { mutateAsync: updateOrgDetails } = usePutApiV1Organizations();
+  const { mutateAsync: uploadImages } = usePostApiV1UsersUploadImages();
   const queryClient = useQueryClient();
+  const { mutateAsync: deleteProfile } = useDeleteApiV1UsersDeleteProfileImage();
+  const { mutateAsync: updatePassword } = usePostApiV1UsersChangePassword();
 
   const {
     register,
@@ -94,8 +102,8 @@ export default function ProfileComponent() {
       setValue("email", userData?.email || "");
       setValue(
         "profileUrl",
-        userData?.profileUrl
-          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileUrl}`
+        userData?.profileImage
+          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileImage}`
           : ""
       );
       setValue("role", userData?.roles?.[0] || "super_admin");
@@ -116,11 +124,9 @@ export default function ProfileComponent() {
         },
         {
           onSuccess: () => {
-            // Invalidate organization query
             queryClient.invalidateQueries({
               queryKey: getGetApiV1OrganizationsMeQueryKey(),
             });
-            // Update form with new organization data
             setValue("organization", data.organization);
             setValue("locality", data.locality);
           },
@@ -136,11 +142,9 @@ export default function ProfileComponent() {
         },
         {
           onSuccess: () => {
-            // Invalidate user query
             queryClient.invalidateQueries({
               queryKey: getGetApiV1UsersMeQueryKey(),
             });
-            // Update form with new user data
             setValue("username", data.username);
           },
         }
@@ -152,11 +156,59 @@ export default function ProfileComponent() {
     }
   };
 
-  const onPasswordSubmit = (data: PasswordFormData) => {
-    console.log("Password update:", data);
-    setIsPasswordModalOpen(false);
-    resetPassword();
-    // Add your API call to update password here
+  const onPasswordSubmit = async (data: PasswordFormData) => {
+    try {
+      if (data.newPassword !== data.confirmPassword) {
+        return; // Validation is handled by react-hook-form
+      }
+
+      await updatePassword(
+        {
+          data: {
+            oldPassword: data.currentPassword,
+            newPassword: data.newPassword,
+          },
+        },
+        {
+          onSuccess: () => {
+            setIsPasswordModalOpen(false);
+            resetPassword();
+            alert("Password updated successfully");
+          },
+          onError: (error) => {
+            console.error("Error updating password:", error);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating password:", error);
+    }
+  };
+
+  const uploadFile = async (file: File, type: uploadFileType) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const response = await uploadImages({
+        data: {
+          profileImage: file,
+        },
+      }, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: getGetApiV1UsersMeQueryKey(),
+          });
+        },
+      });
+
+      const profileUrl = response.profileUrlUrl
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${response.profileUrlUrl}`
+        : null;
+
+      setValue("profileUrl", String(profileUrl));
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
   };
 
   if (isUserLoading || isOrgLoading) {
@@ -168,6 +220,17 @@ export default function ProfileComponent() {
   }
 
   const profileUrl = userWatch("profileUrl");
+
+  const handleDeleteProfile = async () => {
+    await deleteProfile(undefined, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetApiV1UsersMeQueryKey(),
+        });
+        setValue("profileUrl", "");
+      },
+    });
+  };
 
   return (
     <div className="p-6 min-h-screen rounded-lg bg-white">
@@ -181,10 +244,23 @@ export default function ProfileComponent() {
             <div className="space-y-4">
               <div className="border-2 border-dashed p-4">
                 <div className="flex justify-end items-center">
-                  <Button variant="ghost" size="icon" className="size-8">
-                    <Edit className="w-4 h-4 text-gray-600" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="size-8">
+                  <FileUploadPopup
+                    key="ProfileLogo"
+                    type={uploadFileType.ProfileImage}
+                    uploadFile={uploadFile}
+                    setValue={setValue}
+                    tempImageUrl="profileUrl"
+                  >
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <Edit className="w-4 h-4 text-gray-600" />
+                    </Button>
+                  </FileUploadPopup>
+                  <Button
+                    variant="ghost"
+                    onClick={handleDeleteProfile}
+                    size="icon"
+                    className="size-8"
+                  >
                     <Trash2 className="w-4 h-4 text-gray-600" />
                   </Button>
                 </div>
@@ -220,7 +296,7 @@ export default function ProfileComponent() {
                           htmlFor="currentPassword"
                           className="text-sm font-medium text-gray-700"
                         >
-                          Previous password
+                          Current Password
                         </Label>
                         <Input
                           id="currentPassword"
@@ -239,10 +315,14 @@ export default function ProfileComponent() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-gray-700">
+                        <Label
+                          htmlFor="newPassword"
+                          className="text-sm font-medium text-gray-700"
+                        >
                           New Password
                         </Label>
                         <Input
+                          id="newPassword"
                           type="password"
                           placeholder="Enter New Password"
                           {...registerPassword("newPassword", {
@@ -250,6 +330,10 @@ export default function ProfileComponent() {
                             minLength: {
                               value: 8,
                               message: "Password must be at least 8 characters",
+                            },
+                            pattern: {
+                              value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+                              message: "Password must contain at least one letter, one number, and one special character",
                             },
                           })}
                           className="w-full"
@@ -262,7 +346,14 @@ export default function ProfileComponent() {
                       </div>
 
                       <div className="space-y-2">
+                        <Label
+                          htmlFor="confirmPassword"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Confirm New Password
+                        </Label>
                         <Input
+                          id="confirmPassword"
                           type="password"
                           placeholder="Confirm New Password"
                           {...registerPassword("confirmPassword", {
@@ -378,8 +469,8 @@ export default function ProfileComponent() {
                 onClick={() => resetProfile({
                   username: userData?.username || "",
                   email: userData?.email || "",
-                  profileUrl: userData?.profileUrl
-                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileUrl}`
+                  profileUrl: userData?.profileImage
+                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileImage}`
                     : "",
                   role: userData?.roles?.[0] || "super_admin",
                   organization: orgData?.name || "",

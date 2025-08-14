@@ -26,17 +26,25 @@ import {
 import { ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Question } from "@/types/dashboard/components/form-builder";
-import { formData } from "@/app/api/question/[id]/data";
+import { useGetApiV1FormsId, usePostApiV1SubmissionsFormFormId } from "@/api/formAPI";
+import { FormField as FormFieldType } from "@/api/model";
+import { useParams } from "next/navigation";
 
 type FormData = {
   [key: string]: any;
 };
-type DynamicFormProps = {
-  id: string;
-};
 
-export default function DynamicForm({ id }: DynamicFormProps) {
-  
+export default function DynamicForm() {
+
+  const { id } = useParams()
+  const { data: dynamicForm } = useGetApiV1FormsId(String(id), {
+    query: {
+      enabled: !!id
+    }
+  })
+
+  const { mutateAsync: submitUserForm } = usePostApiV1SubmissionsFormFormId()
+
   const form = useForm<FormData>({
     defaultValues: async () => {
       const response = await fetch("/api/question/1");
@@ -72,16 +80,25 @@ export default function DynamicForm({ id }: DynamicFormProps) {
   const onSubmit = async (data: FormData) => {
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Form submitted:", data);
-      console.log("Form submitted:", formData.id);
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      // console.log("Form submitted:", data);
+      // console.log("Form submitted:", String(dynamicForm?._id));
+      const response = await submitUserForm({
+        formId: String(id),
+        data: {
+          data: {
+            ...data
+          }
+        }
+      })
+      console.log({ response })
       // Handle successful submission here
     } catch (error) {
       console.error("Submission error:", error);
     }
   };
 
-  const getValidationRules = (question: Question) => {
+  const getValidationRules = (question: FormFieldType) => {
     const rules: any = {};
 
     if (question.required) {
@@ -103,7 +120,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
     return rules;
   };
 
-  const renderQuestion = (question: Question) => {
+  const renderQuestion = (question: FormFieldType) => {
     const { id, type, title, options, required } = question;
     const validationRules = getValidationRules(question);
     switch (type) {
@@ -112,7 +129,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
           <FormField
             key={id}
             control={control}
-            name={id}
+            name={String(id)}
             rules={validationRules}
             render={({ field }) => (
               <FormItem className="space-y-2 sm:space-y-3">
@@ -136,7 +153,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
           <FormField
             key={id}
             control={control}
-            name={id}
+            name={String(id)}
             rules={validationRules}
             render={({ field }) => (
               <FormItem className="space-y-2 sm:space-y-3">
@@ -164,7 +181,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
           <FormField
             key={id}
             control={control}
-            name={id}
+            name={String(id)}
             rules={validationRules}
             render={({ field }) => (
               <FormItem className="space-y-3 sm:space-y-4">
@@ -177,7 +194,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
                     value={field.value}
                     className="space-y-2 sm:space-y-3"
                   >
-                    {options.map((option: string, index: number) => (
+                    {options?.map((option: string, index: number) => (
                       <div
                         key={option}
                         className="flex items-center space-x-2 sm:space-x-3"
@@ -213,7 +230,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
           <FormField
             key={id}
             control={control}
-            name={id}
+            name={String(id)}
             rules={validationRules}
             render={({ field }) => (
               <FormItem className="space-y-2 sm:space-y-3">
@@ -227,7 +244,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {options.map((option: string) => (
+                    {options?.map((option: string) => (
                       <SelectItem
                         key={option}
                         value={option}
@@ -249,7 +266,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
           <FormField
             key={id}
             control={control}
-            name={id}
+            name={String(id)}
             rules={validationRules}
             render={({ field }) => (
               <FormItem className="space-y-3 sm:space-y-4">
@@ -257,11 +274,11 @@ export default function DynamicForm({ id }: DynamicFormProps) {
                   {title} {required && <span className="text-red-500">*</span>}
                 </FormLabel>
                 <div className="space-y-2 sm:space-y-3">
-                  {options.map((option: string) => (
+                  {options?.map((option: string) => (
                     <FormField
                       key={option}
                       control={control}
-                      name={id}
+                      name={String(id)}
                       render={({ field }) => {
                         return (
                           <FormItem
@@ -306,7 +323,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
     }
   };
 
-  const sortedQuestions = formData.questions.sort((a, b) => a.order - b.order);
+  const sortedQuestions = dynamicForm?.fields?.sort((a, b) => Number(a?.order) - Number(b?.order));
 
   return (
     <div className="min-h-screen bg-white">
@@ -318,14 +335,14 @@ export default function DynamicForm({ id }: DynamicFormProps) {
 
         <div className="-mt-12 sm:-mt-16 flex justify-start">
           <Avatar className="size-24 sm:size-28 border-4 border-white shadow-md">
-            <AvatarImage src={formData.logo || "/placeholder.svg"} />
+            <AvatarImage src={dynamicForm?.logoImage || "/placeholder.svg"} />
             <AvatarFallback>AC</AvatarFallback>
           </Avatar>
         </div>
         {/* Form Title - Aligned with form inputs */}
         <div className="mb-8 sm:mb-10 md:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 text-left">
-            {formData.title}
+            {dynamicForm?.title}
           </h1>
         </div>
 
@@ -337,7 +354,7 @@ export default function DynamicForm({ id }: DynamicFormProps) {
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-6 sm:space-y-8"
               >
-                {sortedQuestions.map(renderQuestion)}
+                {sortedQuestions?.map(renderQuestion)}
 
                 {/* Submit Button - Responsive */}
                 <div className="pt-6 sm:pt-8">

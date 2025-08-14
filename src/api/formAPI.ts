@@ -22,10 +22,12 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  DeleteApiV1UsersDeleteProfileImage200,
   DeleteUserResponse,
   Form,
   FormRequest,
   FormResponse,
+  GetApiV1FormsFormIdVisibility200,
   GetApiV1FormsSearch200,
   GetApiV1FormsSearchParams,
   GetApiV1Users200,
@@ -34,13 +36,20 @@ import type {
   GetOrganizationByIdResponse,
   OrganizationDetail,
   OrganizationUpdateRequest,
-  PostApiV1AuthRegister200,
   PostApiV1FormsUploadImagesId201,
   PostApiV1FormsUploadImagesIdBody,
   PostApiV1OrganizationsUserInvite201,
   PostApiV1OrganizationsUserInviteBody,
+  PostApiV1SubmissionsFormFormId200,
+  PostApiV1SubmissionsFormFormIdBody,
+  PostApiV1UsersChangePassword200,
+  PostApiV1UsersChangePasswordBody,
+  PostApiV1UsersUploadImages201,
+  PostApiV1UsersUploadImagesBody,
+  PutApiV1FormsFormIdUpdateVisibilityBody,
   PutApiV1Users200,
   RegisterRequest,
+  RegisterResponse,
   User,
   UserRolesResponse,
   UsersByOrgResponse,
@@ -720,7 +729,7 @@ export const postApiV1AuthRegister = (
   registerRequest: RegisterRequest,
   signal?: AbortSignal,
 ) => {
-  return customInstance<PostApiV1AuthRegister200>({
+  return customInstance<RegisterResponse>({
     url: `/api/v1/auth/register`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -2022,3 +2031,614 @@ export function useGetApiV1UsersMe<
 
   return query;
 }
+
+/**
+ * Uploads one or both images (`coverImage`, `logoImage`) to a form by ID. Accepts multipart/form-data.
+ * @summary Upload cover and logo images
+ */
+export const postApiV1UsersUploadImages = (
+  postApiV1UsersUploadImagesBody: PostApiV1UsersUploadImagesBody,
+  signal?: AbortSignal,
+) => {
+  const formData = customFormData(postApiV1UsersUploadImagesBody);
+  return customInstance<PostApiV1UsersUploadImages201>({
+    url: `/api/v1/users/upload-images`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    signal,
+  });
+};
+
+export const getPostApiV1UsersUploadImagesMutationOptions = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1UsersUploadImages>>,
+    TError,
+    { data: PostApiV1UsersUploadImagesBody },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1UsersUploadImages>>,
+  TError,
+  { data: PostApiV1UsersUploadImagesBody },
+  TContext
+> => {
+  const mutationKey = ["postApiV1UsersUploadImages"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1UsersUploadImages>>,
+    { data: PostApiV1UsersUploadImagesBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1UsersUploadImages(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1UsersUploadImagesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1UsersUploadImages>>
+>;
+export type PostApiV1UsersUploadImagesMutationBody =
+  PostApiV1UsersUploadImagesBody;
+export type PostApiV1UsersUploadImagesMutationError = ErrorType<
+  null | null | null
+>;
+
+/**
+ * @summary Upload cover and logo images
+ */
+export const usePostApiV1UsersUploadImages = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiV1UsersUploadImages>>,
+      TError,
+      { data: PostApiV1UsersUploadImagesBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1UsersUploadImages>>,
+  TError,
+  { data: PostApiV1UsersUploadImagesBody },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1UsersUploadImagesMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Deletes the currently uploaded profile image for the authenticated user.
+ * @summary Delete the user's profile image
+ */
+export const deleteApiV1UsersDeleteProfileImage = () => {
+  return customInstance<DeleteApiV1UsersDeleteProfileImage200>({
+    url: `/api/v1/users/delete-profile-image`,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteApiV1UsersDeleteProfileImageMutationOptions = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteApiV1UsersDeleteProfileImage>>,
+    TError,
+    void,
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteApiV1UsersDeleteProfileImage>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["deleteApiV1UsersDeleteProfileImage"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteApiV1UsersDeleteProfileImage>>,
+    void
+  > = () => {
+    return deleteApiV1UsersDeleteProfileImage();
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteApiV1UsersDeleteProfileImageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteApiV1UsersDeleteProfileImage>>
+>;
+
+export type DeleteApiV1UsersDeleteProfileImageMutationError = ErrorType<
+  null | null
+>;
+
+/**
+ * @summary Delete the user's profile image
+ */
+export const useDeleteApiV1UsersDeleteProfileImage = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteApiV1UsersDeleteProfileImage>>,
+      TError,
+      void,
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteApiV1UsersDeleteProfileImage>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationOptions =
+    getDeleteApiV1UsersDeleteProfileImageMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Allows the authenticated user to change their password by providing the current password and a new password.
+ * @summary Change user password
+ */
+export const postApiV1UsersChangePassword = (
+  postApiV1UsersChangePasswordBody: PostApiV1UsersChangePasswordBody,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PostApiV1UsersChangePassword200>({
+    url: `/api/v1/users/change-password`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: postApiV1UsersChangePasswordBody,
+    signal,
+  });
+};
+
+export const getPostApiV1UsersChangePasswordMutationOptions = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1UsersChangePassword>>,
+    TError,
+    { data: PostApiV1UsersChangePasswordBody },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1UsersChangePassword>>,
+  TError,
+  { data: PostApiV1UsersChangePasswordBody },
+  TContext
+> => {
+  const mutationKey = ["postApiV1UsersChangePassword"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1UsersChangePassword>>,
+    { data: PostApiV1UsersChangePasswordBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1UsersChangePassword(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1UsersChangePasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1UsersChangePassword>>
+>;
+export type PostApiV1UsersChangePasswordMutationBody =
+  PostApiV1UsersChangePasswordBody;
+export type PostApiV1UsersChangePasswordMutationError = ErrorType<null | null>;
+
+/**
+ * @summary Change user password
+ */
+export const usePostApiV1UsersChangePassword = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiV1UsersChangePassword>>,
+      TError,
+      { data: PostApiV1UsersChangePasswordBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1UsersChangePassword>>,
+  TError,
+  { data: PostApiV1UsersChangePasswordBody },
+  TContext
+> => {
+  const mutationOptions =
+    getPostApiV1UsersChangePasswordMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Allows updating visibility settings, allowed domains, and allowed emails for a form.
+ * @summary Update form visibility and access settings
+ */
+export const putApiV1FormsFormIdUpdateVisibility = (
+  formId: string,
+  putApiV1FormsFormIdUpdateVisibilityBody: PutApiV1FormsFormIdUpdateVisibilityBody,
+) => {
+  return customInstance<Form>({
+    url: `/api/v1/forms/${formId}/update-visibility`,
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    data: putApiV1FormsFormIdUpdateVisibilityBody,
+  });
+};
+
+export const getPutApiV1FormsFormIdUpdateVisibilityMutationOptions = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1FormsFormIdUpdateVisibility>>,
+    TError,
+    { formId: string; data: PutApiV1FormsFormIdUpdateVisibilityBody },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof putApiV1FormsFormIdUpdateVisibility>>,
+  TError,
+  { formId: string; data: PutApiV1FormsFormIdUpdateVisibilityBody },
+  TContext
+> => {
+  const mutationKey = ["putApiV1FormsFormIdUpdateVisibility"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof putApiV1FormsFormIdUpdateVisibility>>,
+    { formId: string; data: PutApiV1FormsFormIdUpdateVisibilityBody }
+  > = (props) => {
+    const { formId, data } = props ?? {};
+
+    return putApiV1FormsFormIdUpdateVisibility(formId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PutApiV1FormsFormIdUpdateVisibilityMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putApiV1FormsFormIdUpdateVisibility>>
+>;
+export type PutApiV1FormsFormIdUpdateVisibilityMutationBody =
+  PutApiV1FormsFormIdUpdateVisibilityBody;
+export type PutApiV1FormsFormIdUpdateVisibilityMutationError = ErrorType<
+  null | null | null
+>;
+
+/**
+ * @summary Update form visibility and access settings
+ */
+export const usePutApiV1FormsFormIdUpdateVisibility = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof putApiV1FormsFormIdUpdateVisibility>>,
+      TError,
+      { formId: string; data: PutApiV1FormsFormIdUpdateVisibilityBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof putApiV1FormsFormIdUpdateVisibility>>,
+  TError,
+  { formId: string; data: PutApiV1FormsFormIdUpdateVisibilityBody },
+  TContext
+> => {
+  const mutationOptions =
+    getPutApiV1FormsFormIdUpdateVisibilityMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Retrieves the visibility settings and allowed emails for a specific form.
+ * @summary Get form visibility settings
+ */
+export const getApiV1FormsFormIdVisibility = (
+  formId: string,
+  signal?: AbortSignal,
+) => {
+  return customInstance<GetApiV1FormsFormIdVisibility200>({
+    url: `/api/v1/forms/${formId}/visibility`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetApiV1FormsFormIdVisibilityQueryKey = (formId?: string) => {
+  return [`/api/v1/forms/${formId}/visibility`] as const;
+};
+
+export const getGetApiV1FormsFormIdVisibilityQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1FormsFormIdVisibilityQueryKey(formId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>
+  > = ({ signal }) => getApiV1FormsFormIdVisibility(formId, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!formId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1FormsFormIdVisibilityQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>
+>;
+export type GetApiV1FormsFormIdVisibilityQueryError = ErrorType<null | null>;
+
+export function useGetApiV1FormsFormIdVisibility<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsFormIdVisibility<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsFormIdVisibility<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get form visibility settings
+ */
+
+export function useGetApiV1FormsFormIdVisibility<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdVisibility>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1FormsFormIdVisibilityQueryOptions(
+    formId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Allows submission of form responses. The `data` object contains dynamic keys representing field IDs and their corresponding answers.
+ * @summary Submit form data
+ */
+export const postApiV1SubmissionsFormFormId = (
+  formId: string,
+  postApiV1SubmissionsFormFormIdBody: PostApiV1SubmissionsFormFormIdBody,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PostApiV1SubmissionsFormFormId200>({
+    url: `/api/v1/submissions/form/${formId}`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: postApiV1SubmissionsFormFormIdBody,
+    signal,
+  });
+};
+
+export const getPostApiV1SubmissionsFormFormIdMutationOptions = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1SubmissionsFormFormId>>,
+    TError,
+    { formId: string; data: PostApiV1SubmissionsFormFormIdBody },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1SubmissionsFormFormId>>,
+  TError,
+  { formId: string; data: PostApiV1SubmissionsFormFormIdBody },
+  TContext
+> => {
+  const mutationKey = ["postApiV1SubmissionsFormFormId"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1SubmissionsFormFormId>>,
+    { formId: string; data: PostApiV1SubmissionsFormFormIdBody }
+  > = (props) => {
+    const { formId, data } = props ?? {};
+
+    return postApiV1SubmissionsFormFormId(formId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1SubmissionsFormFormIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1SubmissionsFormFormId>>
+>;
+export type PostApiV1SubmissionsFormFormIdMutationBody =
+  PostApiV1SubmissionsFormFormIdBody;
+export type PostApiV1SubmissionsFormFormIdMutationError = ErrorType<
+  null | null | null
+>;
+
+/**
+ * @summary Submit form data
+ */
+export const usePostApiV1SubmissionsFormFormId = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiV1SubmissionsFormFormId>>,
+      TError,
+      { formId: string; data: PostApiV1SubmissionsFormFormIdBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1SubmissionsFormFormId>>,
+  TError,
+  { formId: string; data: PostApiV1SubmissionsFormFormIdBody },
+  TContext
+> => {
+  const mutationOptions =
+    getPostApiV1SubmissionsFormFormIdMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};

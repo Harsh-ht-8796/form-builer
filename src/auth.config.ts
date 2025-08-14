@@ -6,6 +6,7 @@ import { registerSchema, signInSchema } from "@/lib/zod";
 import { ZodError } from "zod";
 import axios from "axios";
 import { JWT } from "next-auth/jwt";
+import { RegisterResponse, User } from "./api/model";
 
 
 declare module "next-auth" {
@@ -17,6 +18,7 @@ declare module "next-auth" {
             username?: string;
             isEmailVerified: boolean;
             roles: string[];
+            profileImage: string;
             orgId: string;
             accessToken: string;
         };
@@ -28,6 +30,7 @@ declare module "next-auth" {
         username: string;
         isEmailVerified: boolean;
         roles: string[];
+        profileImage: string;
         orgId: string;
         accessToken: string;
     }
@@ -39,15 +42,16 @@ declare module "next-auth/jwt" {
         email: string;
         username: string;
         isEmailVerified: boolean;
+        profileImage: string;
         roles: string[];
         orgId: string;
         accessToken: string;
     }
 }
 
-async function getUserFromDb(email: string, password: string) {
+async function getUserFromDb<LoginResponse>(email: string, password: string) {
     try {
-        const response = await axios.post("http://localhost:5000/api/v1/auth/login", {
+        const response = await axios.post<LoginResponse>("http://localhost:5000/api/v1/auth/login", {
             email,
             password,
         }, {
@@ -62,9 +66,9 @@ async function getUserFromDb(email: string, password: string) {
     }
 }
 
-async function getUserFromDbRegister(username: string, email: string, password: string) {
+async function getUserFromDbRegister<User>(username: string, email: string, password: string) {
     try {
-        const response = await axios.post("http://localhost:5000/api/v1/auth/register", {
+        const response = await axios.post<User>("http://localhost:5000/api/v1/auth/register", {
             username,
             email,
             password,
@@ -104,7 +108,7 @@ export default {
                     // logic to salt and hash password
 
                     // logic to verify if the user exists
-                    response = await getUserFromDb(email, password);
+                    response = await getUserFromDb<RegisterResponse>(email, password);
 
                     if (!response) {
                         return null;
@@ -113,13 +117,14 @@ export default {
 
                     // return JSON object with the user data
                     return {
-                        id: user.id,
-                        email: user.email,
-                        username: user.username,
-                        isEmailVerified: user.isEmailVerified,
-                        roles: user.roles,
-                        orgId: user.orgId,
-                        accessToken: tokens.access.token, // include token for session use
+                        id: String(user?.id),
+                        email: String(user?.email),
+                        username: String(user?.username),
+                        isEmailVerified: Boolean(user?.isEmailVerified),
+                        roles: Array.isArray(user?.roles) ? user.roles : [],
+                        orgId: String(user?.orgId),
+                        profileImage: String(user?.profileImage),
+                        accessToken: String(tokens?.access?.token), // include token for session use
                     };
                 } catch (error) {
                     if (error instanceof ZodError) {
@@ -155,23 +160,24 @@ export default {
                     // logic to salt and hash password
 
                     // logic to verify if the user exists
-                    response = await getUserFromDbRegister(name, email, password);
+                    response = await getUserFromDbRegister<RegisterResponse>(name, email, password);
 
                     console.log("Response:", response);
                     if (!response) {
                         return null;
                     }
                     const { user, tokens } = response;
-
+                    // user?.profileImage
                     // return JSON object with the user data
                     return {
-                        id: user.id,
-                        email: user.email,
-                        username: user.username,
-                        isEmailVerified: user.isEmailVerified,
-                        roles: user.roles,
-                        orgId: user.orgId,
-                        accessToken: tokens.access.token, // include token for session use
+                        id: String(user?.id),
+                        email: String(user?.email),
+                        username: String(user?.username),
+                        isEmailVerified: Boolean(user?.isEmailVerified),
+                        roles: Array.isArray(user?.roles) ? user.roles : [],
+                        orgId: String(user?.orgId),
+                        profileImage: String(user?.profileImage),
+                        accessToken: String(tokens?.access?.token), // include token for session use
                     };
                 } catch (error) {
                     if (error instanceof ZodError) {
@@ -204,6 +210,7 @@ export default {
                 token.isEmailVerified = user.isEmailVerified;
                 token.roles = user.roles;
                 token.orgId = user.orgId;
+                token.profileImage = user.profileImage;
                 token.accessToken = user.accessToken; // you'll manually assign this in `authorize`
             }
             return token;
@@ -213,7 +220,7 @@ export default {
                 ? Promise.resolve(url)
                 : Promise.resolve(baseUrl);
         },
-        
+
         session({ session, token, user }) {
 
             if (token) {
@@ -221,6 +228,7 @@ export default {
                 session.user.email = token.email;
                 session.user.username = token.username;
                 session.user.isEmailVerified = token.isEmailVerified;
+                session.user.profileImage = token.profileImage;
                 session.user.roles = token.roles;
                 session.user.orgId = token.orgId;
                 session.user.accessToken = token.accessToken;

@@ -8,34 +8,28 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { uploadFileType } from "@/types/dashboard/components/form-builder";
 import { CloudUpload, Trash2 } from "lucide-react";
 import { useState, useRef, DragEvent } from "react";
-import { UseFormSetValue } from "react-hook-form";
+import { FieldValues, Path, PathValue, UseFormSetValue } from "react-hook-form";
 
-type FormInputs = {
-  selectedTheme: string;
-  formTitle: string;
-  formDescription: string;
-  questions: any[];
-  coverImageUrl?: string | null;
-  logoImageUrl?: string | null;
-};
-
-type FileUploadPopupProps = {
+type FileUploadPopupProps<FormType extends FieldValues> = {
   children: React.ReactNode;
   onRemove?: () => void;
-  setValue: UseFormSetValue<FormInputs>;
-  uploadFile: (file: File, type: "coverImage" | "logoImage") => Promise<void>;
-  type: "coverImage" | "logoImage";
+  setValue: UseFormSetValue<FormType>;
+  uploadFile: (file: File, type: uploadFileType) => Promise<void>;
+  type: uploadFileType;
+  tempImageUrl: Path<FormType>;
 };
 
-export default function FileUploadPopup({
+export default function FileUploadPopup<T extends FieldValues>({
   children,
   uploadFile,
   type,
   onRemove,
   setValue,
-}: FileUploadPopupProps) {
+  tempImageUrl
+}: FileUploadPopupProps<T>) {
   const [open, setOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [tempFile, setTempFile] = useState<File | null>(null);
@@ -44,7 +38,8 @@ export default function FileUploadPopup({
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
       setTempFile(file);
-      setValue(type === "coverImage" ? "coverImageUrl" : "logoImageUrl", URL.createObjectURL(file));
+      setValue(tempImageUrl, URL.createObjectURL(file) as PathValue<T, typeof tempImageUrl>);
+      console.log(file)
       uploadFile(file, type);
       setOpen(false);
     }
@@ -55,7 +50,7 @@ export default function FileUploadPopup({
     if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
       const file = event.dataTransfer.files[0];
       setTempFile(file);
-      setValue(type === "coverImage" ? "coverImageUrl" : "logoImageUrl", URL.createObjectURL(file));
+      setValue(tempImageUrl, URL.createObjectURL(file) as PathValue<T, typeof tempImageUrl>);
       uploadFile(file, type);
       setOpen(false);
     }
