@@ -13,11 +13,9 @@ AXIOS_INSTANCE.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
     const token = getToken()    
     // Example: Add auth token if needed
-    console.log("Org Session in middleware:", token);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('[Request]', config);
     return config;
   },
   (error: AxiosError) => {
@@ -29,7 +27,6 @@ AXIOS_INSTANCE.interceptors.request.use(
 // Add response interceptor
 AXIOS_INSTANCE.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log('[Response]', response);
     return response;
   },
   (error: AxiosError) => {

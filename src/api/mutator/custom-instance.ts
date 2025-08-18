@@ -12,11 +12,9 @@ AXIOS_INSTANCE.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
     // Example: Add auth token if needed
     const session = await getSession(); // Get the session using the NextAuth.js getSession helper
-    console.log("Session in middleware:", session);
     if (session?.user?.accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${session?.user?.accessToken}`;
     }
-    console.log('[Request]', config);
     return config;
   },
   (error: AxiosError) => {
@@ -28,7 +26,6 @@ AXIOS_INSTANCE.interceptors.request.use(
 // Add response interceptor
 AXIOS_INSTANCE.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log('[Response]', response);
     return response;
   },
   (error: AxiosError) => {

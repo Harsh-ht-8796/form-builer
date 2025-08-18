@@ -142,7 +142,6 @@ export default function ReceivedFormsPage() {
       cell: ({ row }: any) => {
         const title = row.getValue("title");
         const id = row.getValue("_id");
-        console.log({ id })
         return (
           <div onClick={() => handleFormClick(id)} className="flex items-center gap-4">
             {title}

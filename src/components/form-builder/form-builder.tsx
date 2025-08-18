@@ -259,12 +259,10 @@ export const SharePopup: React.FC<SharePopupProps> = ({ onClose, onPublish }) =>
       {
         onSuccess: () => {
           onClose();
-          console.log("Calling from on sucess")
           router.push("/sent")
         },
       }
     );
-    console.log("handle submit");
   };
 
   return (

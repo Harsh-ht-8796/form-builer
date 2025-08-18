@@ -69,7 +69,6 @@ export default function DraftFormsPage() {
     () =>
       debounce((term: string) => {
         setQueryParams((prev) => {
-          console.log({ term });
           return {
             ...prev,
             title: term, // only add title if term is truthy
@@ -98,7 +97,6 @@ export default function DraftFormsPage() {
   const handleSearchTermChange = useCallback(
     (term: string) => {
       setSearchTerm(term);
-      console.log(term);
       debouncedUpdateSearchTerm(term);
     },
     [debouncedUpdateSearchTerm]
@@ -123,7 +121,6 @@ export default function DraftFormsPage() {
 
   // Invalidate query when queryParams changes
   useEffect(() => {
-    console.log(queryParams);
     queryClient.invalidateQueries({
       queryKey: [...getGetApiV1FormsSearchQueryKey(queryParams)],
     });

@@ -91,7 +91,6 @@ export default function DynamicForm() {
           }
         }
       })
-      console.log({ response })
       // Handle successful submission here
     } catch (error) {
       console.error("Submission error:", error);

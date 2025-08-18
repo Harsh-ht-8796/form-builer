@@ -39,7 +39,6 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const handleLogout = async () => {
-    console.log("Logout====>")
     await logout();
     router.replace("/auth/login");
   };

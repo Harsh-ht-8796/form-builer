@@ -71,7 +71,6 @@ export default function SentFormsPage() {
     () =>
       debounce((term: string) => {
         setQueryParams((prev) => {
-          console.log({ term });
           return {
             ...prev,
             title: term, // only add title if term is truthy
@@ -100,7 +99,6 @@ export default function SentFormsPage() {
   const handleSearchTermChange = useCallback(
     (term: string) => {
       setSearchTerm(term);
-      console.log(term);
       debouncedUpdateSearchTerm(term);
     },
     [debouncedUpdateSearchTerm]
@@ -125,7 +123,6 @@ export default function SentFormsPage() {
 
   // Invalidate query when queryParams changes
   useEffect(() => {
-    console.log(queryParams);
     queryClient.invalidateQueries({
       queryKey: [...getGetApiV1FormsSearchQueryKey(queryParams)],
     });
@@ -264,7 +261,6 @@ export default function SentFormsPage() {
         cellClassName: "text-center",
       },
       cell: ({ row }: any) => {
-        console.log(row.getValue("status"));
         const status = row.getValue("status");
         return (
           <div className="flex items-center justify-end">
@@ -272,7 +268,6 @@ export default function SentFormsPage() {
               <Button
                 variant="ghost"
                 onClick={() => {
-                  console.log(row.getValue("_id"));
                   router.push(`/form-builder/${row.getValue("_id")}`);
                 }}
                 size="sm"

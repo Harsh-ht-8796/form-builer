@@ -35,7 +35,6 @@ export default function LoginPage() {
     }
 
     setError(String(result?.error));
-    console.log("Login result:", result);
   };
 
   return (

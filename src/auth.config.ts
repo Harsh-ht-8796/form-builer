@@ -104,7 +104,6 @@ export default {
                 try {
                     let response = null;
                     const { email, password } = await signInSchema.parseAsync(credentials);
-                    console.log("Email:", email, "Password:", password);
                     // logic to salt and hash password
 
                     // logic to verify if the user exists
@@ -157,7 +156,6 @@ export default {
                 try {
                     let response = null;
                     const { name, email, password } = await registerSchema.parseAsync(credentials);
-                    console.log("Name:", name, "Email:", email, "Password:", password);
                     // logic to salt and hash password
 
                     // logic to verify if the user exists
@@ -221,7 +219,6 @@ export default {
                 : Promise.resolve(baseUrl);
         },
         authorized({ auth }) {
-            console.log({ auth })
             const isAuthenticated = !!auth?.user;
 
             return isAuthenticated;

@@ -26,7 +26,6 @@ export default function DemoFormPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     toast.success("Thank you for your feedback! Form submitted successfully.")
-    console.log("Form submitted:", formData)
   }
 
   const handleFeatureChange = (feature: string, checked: boolean) => {

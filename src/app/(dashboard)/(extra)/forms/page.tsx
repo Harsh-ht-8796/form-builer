@@ -75,12 +75,10 @@ export default function FormsPage() {
   const filteredForms = forms.filter((form) => form.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const handleDuplicate = (formId: number) => {
-    console.log("Duplicate form with ID:", formId)
     toast.success("Form duplicated successfully!")
   }
 
   const handleDelete = (formId: number) => {
-    console.log("Delete form with ID:", formId)
     toast.success("Form deleted successfully!")
   }
 
