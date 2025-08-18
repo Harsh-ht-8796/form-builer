@@ -39,19 +39,12 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const handleLogout = async () => {
-    logout();
+    console.log("Logout====>")
+    await logout();
     router.replace("/auth/login");
   };
   const { data: session, status } = useSession();
 
-  useEffect(() => {
-    if (!session?.user && status === "unauthenticated") {
-      router.push("/auth/login");
-    }
-  }, [session, router, status]);
-  if (status === "loading" || !session?.user) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <SidebarProvider>
@@ -104,7 +97,7 @@ export default function DashboardLayout({
                   <Avatar className="cursor-pointer">
                     <AvatarImage
                       className="size-8 rounded-full bg-purple-100"
-                      src={session.user?.profileImage
+                      src={session?.user?.profileImage
                         ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${session.user?.profileImage}`
                         : "https://github.com/shadcn.png"}
                       alt="@shadcn"

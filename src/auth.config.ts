@@ -135,6 +135,7 @@ export default {
                 }
             },
 
+
         }),
         Credentials({
             name: "register-credentials",
@@ -162,7 +163,6 @@ export default {
                     // logic to verify if the user exists
                     response = await getUserFromDbRegister<RegisterResponse>(name, email, password);
 
-                    console.log("Response:", response);
                     if (!response) {
                         return null;
                     }
@@ -193,7 +193,7 @@ export default {
     pages: {
 
         signIn: "/auth/login", // Displayed when no user is authenticated
-        signOut: "/auth/logout", // Displayed when user signs out
+        signOut: "/", // Displayed when user signs out
         error: "/auth/error", // Error code passed in query string as ?error=
     },
     debug: process.env.NODE_ENV === "development",
@@ -220,7 +220,12 @@ export default {
                 ? Promise.resolve(url)
                 : Promise.resolve(baseUrl);
         },
+        authorized({ auth }) {
+            console.log({ auth })
+            const isAuthenticated = !!auth?.user;
 
+            return isAuthenticated;
+        },
         session({ session, token, user }) {
 
             if (token) {

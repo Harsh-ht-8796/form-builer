@@ -753,7 +753,7 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
       id: String(id),
       data: formData,
     });
-    router.push(`/sent`);
+    router.push(`/draft`);
   };
 
   const handleLogout = async () => {
@@ -764,17 +764,6 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
   const handlePublish = async (visibility: string, email?: string) => {
     console.log("called published");
   };
-
-  useEffect(() => {
-    if (!session?.user && status === "unauthenticated") {
-      router.push("/auth/login");
-    }
-  }, [session, router, status]);
-
-  if (status === "loading" || !session?.user) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <SidebarProvider>
       <AppSidebar />
