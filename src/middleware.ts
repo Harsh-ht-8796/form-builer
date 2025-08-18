@@ -37,7 +37,10 @@ export default auth(async (req) => {
             if (!response.ok) {
                 if (response.status === 401) {
                     console.error(`Unauthorized access to form ${formId}: 401`);
-                    return Response.redirect(new URL(ROOT, nextUrl));
+                    // Redirect to /auth/login with formId as query parameter
+                    const loginUrl = new URL('/auth/login', nextUrl);
+                    loginUrl.searchParams.set('formId', formId);
+                    return Response.redirect(loginUrl);
                 }
                 throw new Error(`Failed to fetch form status: ${response.status}`);
             }

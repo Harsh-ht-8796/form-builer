@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
@@ -20,6 +20,7 @@ export default function LoginPage() {
   });
 
   const router = useRouter();
+  const searchParams = useSearchParams(); // Access query parameters
 
   const [error, setError] = useState<string | null>(null);
   const onSubmit = async (data: any) => {
@@ -27,11 +28,16 @@ export default function LoginPage() {
       email: data.email,
       password: data.password,
       redirect: false,
-      // callbackUrl: "/dashboard",
     });
 
     if (!result?.error) {
-      router.replace("/dashboard");
+      // Check for formId in query parameters
+      const formId = searchParams.get("formId");
+      if (formId) {
+        router.replace(`/form/${formId}`); // Redirect to /form/:id if formId exists
+      } else {
+        router.replace("/dashboard"); // Fallback to /dashboard
+      }
     }
 
     setError(String(result?.error));
