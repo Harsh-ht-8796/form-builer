@@ -184,6 +184,8 @@ export const SharePopup: React.FC<SharePopupProps> = ({ onClose, onPublish }) =>
   const [shareMode, setShareMode] = useState<PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem>(
     PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem.public
   );
+
+  const router = useRouter()
   const [email, setEmail] = useState("");
   const [shareToOrg, setShareToOrg] = useState(false);
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
@@ -257,6 +259,8 @@ export const SharePopup: React.FC<SharePopupProps> = ({ onClose, onPublish }) =>
       {
         onSuccess: () => {
           onClose();
+          console.log("Calling from on sucess")
+          router.push("/sent")
         },
       }
     );
@@ -749,7 +753,7 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
       id: String(id),
       data: formData,
     });
-    router.push(`/draft`);
+    router.push(`/sent`);
   };
 
   const handleLogout = async () => {

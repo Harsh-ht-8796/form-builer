@@ -254,7 +254,7 @@ export default function SentFormsPage() {
             )}
             <Button
               variant="ghost"
-              onClick={() => handleDelete(row.getValue("id"))}
+              onClick={() => handleDelete(row.getValue("_id"))}
               size="sm"
               className="h-8 w-8 p-0"
             >
