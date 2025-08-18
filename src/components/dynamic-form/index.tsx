@@ -26,7 +26,7 @@ import {
 import { ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Question } from "@/types/dashboard/components/form-builder";
-import { useGetApiV1FormsId, usePostApiV1SubmissionsFormFormId } from "@/api/formAPI";
+import { useGetApiV1FormsIdUserView, usePostApiV1SubmissionsFormFormId } from "@/api/formAPI";
 import { FormField as FormFieldType } from "@/api/model";
 import { useParams } from "next/navigation";
 
@@ -37,7 +37,7 @@ type FormData = {
 export default function DynamicForm() {
 
   const { id } = useParams()
-  const { data: dynamicForm } = useGetApiV1FormsId(String(id), {
+  const { data: dynamicForm } = useGetApiV1FormsIdUserView(String(id), {
     query: {
       enabled: !!id
     }

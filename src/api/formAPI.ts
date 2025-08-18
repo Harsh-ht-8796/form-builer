@@ -469,6 +469,167 @@ export const usePutApiV1FormsId = <
 };
 
 /**
+ * Get a form by its ID
+ * @summary Get Form by ID
+ */
+export const getApiV1FormsIdUserView = (id: string, signal?: AbortSignal) => {
+  return customInstance<Form>({
+    url: `/api/v1/forms/${id}/user-view`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetApiV1FormsIdUserViewQueryKey = (id?: string) => {
+  return [`/api/v1/forms/${id}/user-view`] as const;
+};
+
+export const getGetApiV1FormsIdUserViewQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+  TError = ErrorType<null | null>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1FormsIdUserViewQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1FormsIdUserView>>
+  > = ({ signal }) => getApiV1FormsIdUserView(id, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1FormsIdUserViewQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1FormsIdUserView>>
+>;
+export type GetApiV1FormsIdUserViewQueryError = ErrorType<null | null>;
+
+export function useGetApiV1FormsIdUserView<
+  TData = Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+  TError = ErrorType<null | null>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsIdUserView>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsIdUserView<
+  TData = Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+  TError = ErrorType<null | null>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsIdUserView>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsIdUserView<
+  TData = Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+  TError = ErrorType<null | null>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Form by ID
+ */
+
+export function useGetApiV1FormsIdUserView<
+  TData = Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+  TError = ErrorType<null | null>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsIdUserView>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1FormsIdUserViewQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
  * Search forms by status with pagination.
  * @summary Search forms
  */
