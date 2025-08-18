@@ -606,6 +606,102 @@
           "name",
           "locality"
         ]
+      },
+      "ReceivedFormOrg": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6874e0e894418fbbe607bce2"
+          },
+          "name": {
+            "type": "string",
+            "example": "Acme"
+          }
+        }
+      },
+      "ReceivedUser": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6874b6f9ae642cd5c190146f"
+          },
+          "username": {
+            "type": "string",
+            "example": "YourName66662222"
+          },
+          "email": {
+            "type": "string",
+            "example": "v7@yopmail.com"
+          },
+          "orgId": {
+            "$ref": "#/components/schemas/ReceivedFormOrg"
+          }
+        }
+      },
+      "ReceivedForm": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "68a2f03f289425f67c801f18"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/ReceivedUser"
+          },
+          "title": {
+            "type": "string",
+            "example": "Form Title"
+          },
+          "allowedDomains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": []
+          },
+          "allowedEmails": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            },
+            "example": [
+              "userA@yopmail.com"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "example": "published"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "18-08-2025"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "18-08-2025"
+          }
+        }
+      },
+      "ReceivedFormsResponse": {
+        "type": "object",
+        "properties": {
+          "docs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceivedForm"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
       }
     }
   },
@@ -1770,6 +1866,101 @@
           },
           "404": {
             "description": "Form not found"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/received": {
+      "get": {
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter forms by status (e.g., draft, published)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "published",
+                "all"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of forms per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "Filter forms by active status (true/false)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "description": "Search forms by title",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "description": "Filter forms created after this date (ISO format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "description": "Filter forms created after this date (ISO format)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "summary": "Get received forms",
+        "description": "Returns a list of forms shared with the authenticated user.",
+        "responses": {
+          "200": {
+            "description": "List of received forms",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivedFormsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }

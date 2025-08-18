@@ -28,6 +28,7 @@ import type {
   FormRequest,
   FormResponse,
   GetApiV1FormsFormIdVisibility200,
+  GetApiV1FormsReceivedParams,
   GetApiV1FormsSearch200,
   GetApiV1FormsSearchParams,
   GetApiV1Users200,
@@ -48,6 +49,7 @@ import type {
   PostApiV1UsersUploadImagesBody,
   PutApiV1FormsFormIdUpdateVisibilityBody,
   PutApiV1Users200,
+  ReceivedFormsResponse,
   RegisterRequest,
   RegisterResponse,
   User,
@@ -2642,3 +2644,165 @@ export const usePostApiV1SubmissionsFormFormId = <
 
   return useMutation(mutationOptions, queryClient);
 };
+
+/**
+ * Returns a list of forms shared with the authenticated user.
+ * @summary Get received forms
+ */
+export const getApiV1FormsReceived = (
+  params?: GetApiV1FormsReceivedParams,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ReceivedFormsResponse>({
+    url: `/api/v1/forms/received`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetApiV1FormsReceivedQueryKey = (
+  params?: GetApiV1FormsReceivedParams,
+) => {
+  return [`/api/v1/forms/received`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetApiV1FormsReceivedQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1FormsReceivedParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1FormsReceivedQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1FormsReceived>>
+  > = ({ signal }) => getApiV1FormsReceived(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1FormsReceivedQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1FormsReceived>>
+>;
+export type GetApiV1FormsReceivedQueryError = ErrorType<null>;
+
+export function useGetApiV1FormsReceived<
+  TData = Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+  TError = ErrorType<null>,
+>(
+  params: undefined | GetApiV1FormsReceivedParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsReceived>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsReceived<
+  TData = Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1FormsReceivedParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsReceived>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsReceived<
+  TData = Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1FormsReceivedParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get received forms
+ */
+
+export function useGetApiV1FormsReceived<
+  TData = Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1FormsReceivedParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsReceived>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1FormsReceivedQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
