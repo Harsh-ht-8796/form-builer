@@ -229,6 +229,34 @@ export default function SentFormsPage() {
       header: "Status"
     },
     {
+      accessorKey: "isActive",
+      header: "Status",
+      cell: ({ row }: any) => {
+        const isActive = row.getValue("isActive");
+        return (
+          <div className="flex items-center gap-4">
+            <div
+              className={cn(
+                "flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-full",
+                {
+                  "bg-green-100 text-green-800": isActive,
+                  "bg-red-100 text-red-800": !isActive,
+                }
+              )}
+            >
+              <span
+                className={cn("w-2 h-2 rounded-full", {
+                  "bg-green-500": isActive,
+                  "bg-red-500": !isActive,
+                })}
+              />
+              {isActive ? "Active" : "Closed"}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "action",
       header: "Action",
       meta: {
@@ -315,7 +343,8 @@ export default function SentFormsPage() {
                 _id: false,
                 id: false,
                 allowedEmails: false,
-                allowedDomains: false
+                allowedDomains: false,
+                status:false
               },
             }}
             data={forms?.docs || []}

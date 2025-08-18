@@ -16,6 +16,7 @@ import { useGetApiV1FormsReceived, getGetApiV1FormsReceivedQueryKey } from "@/ap
 import { debounce } from "lodash";
 import moment from "moment";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 interface DateRange {
   from: Date | null;
@@ -37,6 +38,7 @@ export default function ReceivedFormsPage() {
     limit: 10,
     page: 0,
   });
+  const router = useRouter()
 
   // Separate state for UI filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -130,15 +132,28 @@ export default function ReceivedFormsPage() {
       };
     });
   };
-
+  const handleFormClick = (id: string) => {
+    router.push(`form/${id}`)
+  }
   const columns = [
     {
       accessorKey: "title",
       header: "Form name",
+      cell: ({ row }: any) => {
+        const title = row.getValue("title");
+        const id = row.getValue("_id");
+        console.log({ id })
+        return (
+          <div onClick={() => handleFormClick(id)} className="flex items-center gap-4">
+            {title}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "_id",
       header: "Id",
+
     },
     {
       accessorKey: "createdFormByOrgName",
@@ -232,12 +247,6 @@ export default function ReceivedFormsPage() {
             }}
             columns={columns}
             data={forms?.docs || []}
-          // pagination={{
-          //   pageIndex: queryParams.page,
-          //   pageSize: queryParams.limit,
-          //   totalPages: forms?.meta?.totalPages || 1,
-          //   onPageChange: (page) => setQueryParams((prev) => ({ ...prev, page })),
-          // }}
           />
         </div>
       </div>
