@@ -26,7 +26,7 @@ export default auth(async (req) => {
             const token = req.auth?.user.accessToken || API_TOKEN;
 
             // Call the endpoint to check form visibility
-            const response = await fetch(`${API_BASE_URL}/forms/${formId}`, {
+            const response = await fetch(`${API_BASE_URL}/forms/${formId}/user-view`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

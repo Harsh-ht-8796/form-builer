@@ -245,7 +245,7 @@ export const SharePopup: React.FC<SharePopupProps> = ({ onClose, onPublish }) =>
   const handleSubmit = async () => {
     let visibility: PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem[] = [shareMode];
 
-    if (shareToOrg) {
+    if (shareToOrg && shareMode === PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem.private) {
       visibility.push(PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem.domain_restricted);
     }
     await updateVisibility(
