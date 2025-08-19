@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import { MdOutlineGroup } from "react-icons/md";
 
@@ -27,10 +27,12 @@ export function SurveyHeader() {
     const remainingChars = lastView.slice(1);
     setActiveView(firstChar + remainingChars);
   }, []);
+
+  const { id } = useParams()
   const onViewChange = (view: string) => {
     setActiveView(view);
 
-    router.push(`/dashboard/survey-response/${view.toLowerCase()}`);
+    router.push(`/sent/${id}/${view.toLowerCase()}`);
   };
   return (
     <div className="flex items-center justify-between mb-6">

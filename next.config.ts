@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  redirects: async () => {
+  async redirects() {
     return [
       {
         source: "/",
@@ -10,31 +9,29 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/dashboard/survey-response",
-        destination: "/dashboard/survey-response/individual",
+        source: "/sent/:id",
+        destination: "/sent/:id/individual",
         permanent: true,
       },
     ];
   },
   images: {
-    domains: ['form-builer-be.onrender.com'],
+    domains: ["form-builer-be.onrender.com"],
     remotePatterns: [
       {
         protocol: "http",
         hostname: "localhost",
         port: "5000",
-      }
+      },
     ],
   },
   async rewrites() {
     return [
-      { source: '/api/auth/:path*', destination: '/api/auth/:path*' },
-      { source: '/api/:path*', destination: 'http://localhost:5000/api/:path*' },
+      { source: "/api/auth/:path*", destination: "/api/auth/:path*" },
+      { source: "/api/:path*", destination: "http://localhost:5000/api/:path*" },
     ];
   },
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
 };

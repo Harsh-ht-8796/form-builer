@@ -175,10 +175,23 @@ export default function SentFormsPage() {
       };
     });
   };
+
+  const handleRedirect = (id: string) => {
+    router.push("/sent/" + id)
+  }
   const columns = [
     {
       accessorKey: "title",
       header: "Form name",
+      cell: ({ row }: any) => {
+        const title = row.getValue("title");
+        const id = row.getValue("_id");
+        return (
+          <div onClick={() => handleRedirect(id)} className="flex items-center gap-4 text-blue-600 underline">
+            {title}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "id",
@@ -339,7 +352,7 @@ export default function SentFormsPage() {
                 id: false,
                 allowedEmails: false,
                 allowedDomains: false,
-                status:false
+                status: false
               },
             }}
             data={forms?.docs || []}
