@@ -85,7 +85,10 @@
           "__v": {
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "id"
+        ]
       },
       "InvitedUser": {
         "type": "object",
@@ -813,6 +816,77 @@
         "required": [
           "overviewCards"
         ]
+      },
+      "Submission": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "68a455f7de6b52c9321049f1"
+          },
+          "formId": {
+            "type": "string",
+            "example": "689da44d618fe88d2779c85e"
+          },
+          "orgId": {
+            "type": "string",
+            "example": "6874e0e894418fbbe607bce2"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "1755161694558": "Option 2"
+            }
+          },
+          "accessibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "example": "public"
+          },
+          "submittedBy": {
+            "type": "string",
+            "example": "6874b6f9ae642cd5c190146f"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-19T10:46:15.659Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-19T10:46:15.659Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-19T10:46:15.659Z"
+          },
+          "__v": {
+            "type": "integer",
+            "example": 0
+          }
+        }
+      },
+      "SubmissionResponse": {
+        "type": "object",
+        "properties": {
+          "docs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Submission"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
       }
     }
   },
@@ -2202,6 +2276,53 @@
           },
           "401": {
             "description": "Unauthorized - Missing or invalid token"
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/{formId}/individual": {
+      "get": {
+        "summary": "Get individual submissions for a form",
+        "tags": [
+          "Submissions"
+        ],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "689da44d618fe88d2779c85e"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of submissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponse"
+                }
+              }
+            }
           }
         }
       }

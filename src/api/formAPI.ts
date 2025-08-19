@@ -31,6 +31,7 @@ import type {
   GetApiV1FormsReceivedParams,
   GetApiV1FormsSearch200,
   GetApiV1FormsSearchParams,
+  GetApiV1SubmissionsFormIdIndividualParams,
   GetApiV1SubmissionsSummaryParams,
   GetApiV1Users200,
   GetApiV1UsersByOrgParams,
@@ -54,6 +55,7 @@ import type {
   ReceivedFormsResponse,
   RegisterRequest,
   RegisterResponse,
+  SubmissionResponse,
   SubmissionsSummaryResponse,
   User,
   UserRolesResponse,
@@ -3274,6 +3276,188 @@ export function useGetApiV1SubmissionsOverviewCards<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetApiV1SubmissionsOverviewCardsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Get individual submissions for a form
+ */
+export const getApiV1SubmissionsFormIdIndividual = (
+  formId: string,
+  params?: GetApiV1SubmissionsFormIdIndividualParams,
+  signal?: AbortSignal,
+) => {
+  return customInstance<SubmissionResponse>({
+    url: `/api/v1/submissions/${formId}/individual`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetApiV1SubmissionsFormIdIndividualQueryKey = (
+  formId?: string,
+  params?: GetApiV1SubmissionsFormIdIndividualParams,
+) => {
+  return [
+    `/api/v1/submissions/${formId}/individual`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetApiV1SubmissionsFormIdIndividualQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormIdIndividualParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiV1SubmissionsFormIdIndividualQueryKey(formId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>
+  > = ({ signal }) =>
+    getApiV1SubmissionsFormIdIndividual(formId, params, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!formId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1SubmissionsFormIdIndividualQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>
+>;
+export type GetApiV1SubmissionsFormIdIndividualQueryError = ErrorType<unknown>;
+
+export function useGetApiV1SubmissionsFormIdIndividual<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params: undefined | GetApiV1SubmissionsFormIdIndividualParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsFormIdIndividual<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormIdIndividualParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsFormIdIndividual<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormIdIndividualParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get individual submissions for a form
+ */
+
+export function useGetApiV1SubmissionsFormIdIndividual<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormIdIndividualParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormIdIndividual>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1SubmissionsFormIdIndividualQueryOptions(
+    formId,
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
