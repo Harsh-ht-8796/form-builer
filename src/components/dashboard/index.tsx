@@ -14,6 +14,7 @@ import AnalyticsCards from "@/components/dashboard/analyticsCards";
 import SimpleTable from "./simpleTable";
 import { useGetApiV1SubmissionsSummary } from "@/api/formAPI";
 import { GetApiV1SubmissionsSummaryAccessibility as ApiAccessibility } from "@/api/model";
+import { useSearchParams } from "next/navigation";
 
 // Define the accessibility type based on the assumed enum
 type ExtendedAccessibility = ApiAccessibility | "all";
@@ -36,16 +37,23 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function Dashboard() {
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<ExtendedAccessibility>("all");
 
   // Debounce the search term with a 300ms delay
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Pass debouncedSearchTerm as title and typeFilter as accessibility to the API
+  // Get fromDate and toDate from URL query parameters
+  const fromDate = searchParams.get("fromDate");
+  const toDate = searchParams.get("toDate");
+
+  // Pass debouncedSearchTerm as title, typeFilter as accessibility, and fromDate/toDate to the API
   const { data: summeryOfForms } = useGetApiV1SubmissionsSummary({
-    ...(debouncedSearchTerm ? { title: debouncedSearchTerm } : {}), // Use debounced value
-    ...((typeFilter && typeFilter !== "all") ? { accessibility: typeFilter } : {})
+    ...(debouncedSearchTerm ? { title: debouncedSearchTerm } : {}),
+    ...(typeFilter && typeFilter !== "all" ? { accessibility: typeFilter } : {}),
+    ...(fromDate ? { fromDate: fromDate } : {}),
+    ...(toDate ? { toDate: toDate } : {}),
   });
 
   return (
@@ -78,7 +86,9 @@ export default function Dashboard() {
                   {/* Type Filter */}
                   <Select
                     value={typeFilter}
-                    onValueChange={(value: ExtendedAccessibility) => setTypeFilter(value)}
+                    onValueChange={(value: ExtendedAccessibility) =>
+                      setTypeFilter(value)
+                    }
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
