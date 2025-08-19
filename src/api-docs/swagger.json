@@ -766,6 +766,53 @@
             "example": "Form Title"
           }
         }
+      },
+      "OverviewCard": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "Total Forms"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 6
+          },
+          "percentage": {
+            "type": "string",
+            "example": "0.0%"
+          },
+          "id": {
+            "type": "string",
+            "example": "total_form"
+          }
+        },
+        "required": [
+          "label",
+          "value",
+          "id"
+        ]
+      },
+      "OverviewCardsResponse": {
+        "type": "object",
+        "properties": {
+          "overviewCards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OverviewCard"
+            }
+          }
+        },
+        "required": [
+          "overviewCards"
+        ]
       }
     }
   },
@@ -2109,6 +2156,52 @@
           },
           "401": {
             "description": "Unauthorized - Invalid or missing token"
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/overview-cards": {
+      "get": {
+        "summary": "Get overview cards for submissions",
+        "description": "Returns key metrics such as total forms, responses, and average completion rate (private).",
+        "tags": [
+          "Submissions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Overview cards retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverviewCardsResponse"
+                },
+                "example": {
+                  "overviewCards": [
+                    {
+                      "label": "Total Forms",
+                      "value": 6,
+                      "percentage": "0.0%",
+                      "id": "total_form"
+                    },
+                    {
+                      "label": "Total Responses",
+                      "value": 4,
+                      "percentage": "0.0%",
+                      "id": "total_response"
+                    },
+                    {
+                      "label": "Avg. Completion Rate (Private)",
+                      "value": "0%",
+                      "percentage": "N/A",
+                      "id": "avg_completion_rate_private"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
           }
         }
       }

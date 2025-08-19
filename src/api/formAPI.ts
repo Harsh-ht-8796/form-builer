@@ -38,6 +38,7 @@ import type {
   GetOrganizationByIdResponse,
   OrganizationDetail,
   OrganizationUpdateRequest,
+  OverviewCardsResponse,
   PostApiV1FormsUploadImagesId201,
   PostApiV1FormsUploadImagesIdBody,
   PostApiV1OrganizationsUserInvite201,
@@ -3124,6 +3125,155 @@ export function useGetApiV1SubmissionsSummary<
     params,
     options,
   );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Returns key metrics such as total forms, responses, and average completion rate (private).
+ * @summary Get overview cards for submissions
+ */
+export const getApiV1SubmissionsOverviewCards = (signal?: AbortSignal) => {
+  return customInstance<OverviewCardsResponse>({
+    url: `/api/v1/submissions/overview-cards`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetApiV1SubmissionsOverviewCardsQueryKey = () => {
+  return [`/api/v1/submissions/overview-cards`] as const;
+};
+
+export const getGetApiV1SubmissionsOverviewCardsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+  TError = ErrorType<null>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+      TError,
+      TData
+    >
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1SubmissionsOverviewCardsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>
+  > = ({ signal }) => getApiV1SubmissionsOverviewCards(signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1SubmissionsOverviewCardsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>
+>;
+export type GetApiV1SubmissionsOverviewCardsQueryError = ErrorType<null>;
+
+export function useGetApiV1SubmissionsOverviewCards<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+  TError = ErrorType<null>,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsOverviewCards<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+  TError = ErrorType<null>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsOverviewCards<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+  TError = ErrorType<null>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get overview cards for submissions
+ */
+
+export function useGetApiV1SubmissionsOverviewCards<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+  TError = ErrorType<null>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsOverviewCards>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1SubmissionsOverviewCardsQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

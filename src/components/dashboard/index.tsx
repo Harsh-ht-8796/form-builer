@@ -12,7 +12,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import AnalyticsCards from "@/components/dashboard/analyticsCards";
 import SimpleTable from "./simpleTable";
-import { useGetApiV1SubmissionsSummary } from "@/api/formAPI";
+import {  useGetApiV1SubmissionsSummary } from "@/api/formAPI";
 import { GetApiV1SubmissionsSummaryAccessibility as ApiAccessibility } from "@/api/model";
 import { useSearchParams } from "next/navigation";
 
