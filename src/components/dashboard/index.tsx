@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,33 +10,48 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-
-
 import AnalyticsCards from "@/components/dashboard/analyticsCards";
 import SimpleTable from "./simpleTable";
-import { formData } from "@/components/dashboard/data";
+import { useGetApiV1SubmissionsSummary } from "@/api/formAPI";
+import { GetApiV1SubmissionsSummaryAccessibility as ApiAccessibility } from "@/api/model";
 
+// Define the accessibility type based on the assumed enum
+type ExtendedAccessibility = ApiAccessibility | "all";
 
+// Custom debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState("Public");
+  const [typeFilter, setTypeFilter] = useState<ExtendedAccessibility>("all");
 
-  const filteredData = formData.filter((form) => {
-    const matchesSearch = form.formName
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === "All" || form.type === typeFilter;
-    return matchesSearch && matchesType;
+  // Debounce the search term with a 300ms delay
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // Pass debouncedSearchTerm as title and typeFilter as accessibility to the API
+  const { data: summeryOfForms } = useGetApiV1SubmissionsSummary({
+    ...(debouncedSearchTerm ? { title: debouncedSearchTerm } : {}), // Use debounced value
+    ...((typeFilter && typeFilter !== "all") ? { accessibility: typeFilter } : {})
   });
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <div>
         <div className="mx-auto">
-          {/* Date Range Picker */}
-
           {/* Analytics Cards */}
           <AnalyticsCards />
 
@@ -61,21 +76,24 @@ export default function Dashboard() {
                   </div>
 
                   {/* Type Filter */}
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <Select
+                    value={typeFilter}
+                    onValueChange={(value: ExtendedAccessibility) => setTypeFilter(value)}
+                  >
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="All">All</SelectItem>
-                      <SelectItem value="Public">Public</SelectItem>
-                      <SelectItem value="Private">Private</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               {/* Table */}
-              <SimpleTable filteredData={filteredData} />
+              <SimpleTable filteredData={summeryOfForms?.summary || []} />
             </CardContent>
           </Card>
         </div>

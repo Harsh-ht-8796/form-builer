@@ -31,6 +31,7 @@ import type {
   GetApiV1FormsReceivedParams,
   GetApiV1FormsSearch200,
   GetApiV1FormsSearchParams,
+  GetApiV1SubmissionsSummaryParams,
   GetApiV1Users200,
   GetApiV1UsersByOrgParams,
   GetApiV1UsersId200,
@@ -52,6 +53,7 @@ import type {
   ReceivedFormsResponse,
   RegisterRequest,
   RegisterResponse,
+  SubmissionsSummaryResponse,
   User,
   UserRolesResponse,
   UsersByOrgResponse,
@@ -2957,6 +2959,171 @@ export function useGetApiV1FormsReceived<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetApiV1FormsReceivedQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Retrieve a summary of submissions filtered by title and accessibility.
+ * @summary Get submissions summary
+ */
+export const getApiV1SubmissionsSummary = (
+  params?: GetApiV1SubmissionsSummaryParams,
+  signal?: AbortSignal,
+) => {
+  return customInstance<SubmissionsSummaryResponse>({
+    url: `/api/v1/submissions/summary`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetApiV1SubmissionsSummaryQueryKey = (
+  params?: GetApiV1SubmissionsSummaryParams,
+) => {
+  return [`/api/v1/submissions/summary`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetApiV1SubmissionsSummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1SubmissionsSummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1SubmissionsSummaryQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>
+  > = ({ signal }) => getApiV1SubmissionsSummary(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1SubmissionsSummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>
+>;
+export type GetApiV1SubmissionsSummaryQueryError = ErrorType<null>;
+
+export function useGetApiV1SubmissionsSummary<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+  TError = ErrorType<null>,
+>(
+  params: undefined | GetApiV1SubmissionsSummaryParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsSummary<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1SubmissionsSummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsSummary<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1SubmissionsSummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get submissions summary
+ */
+
+export function useGetApiV1SubmissionsSummary<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+  TError = ErrorType<null>,
+>(
+  params?: GetApiV1SubmissionsSummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsSummary>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1SubmissionsSummaryQueryOptions(
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

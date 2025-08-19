@@ -702,6 +702,70 @@
             "$ref": "#/components/schemas/PaginationMeta"
           }
         }
+      },
+      "SubmissionsSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SummaryItem"
+            }
+          }
+        },
+        "example": {
+          "summary": [
+            {
+              "_id": "68a2f03f289425f67c801f18",
+              "responseCount": 3,
+              "formId": "68a2f03f289425f67c801f18",
+              "formName": "Form Title"
+            },
+            {
+              "_id": "689da44d618fe88d2779c85e",
+              "responseCount": 15,
+              "formId": "689da44d618fe88d2779c85e",
+              "formName": "Form Title"
+            },
+            {
+              "_id": "68a418b753e0a89d7cbfacb8",
+              "responseCount": 2,
+              "formId": "68a418b753e0a89d7cbfacb8",
+              "formName": "Form Title22"
+            }
+          ]
+        }
+      },
+      "SummaryItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "object",
+            "properties": {
+              "formId": {
+                "type": "string"
+              },
+              "accessibility": {
+                "type": "string"
+              }
+            }
+          },
+          "responseCount": {
+            "type": "integer",
+            "description": "Number of responses received",
+            "example": 3
+          },
+          "formId": {
+            "type": "string",
+            "description": "Form ID associated with this summary",
+            "example": "68a2f03f289425f67c801f18"
+          },
+          "formName": {
+            "type": "string",
+            "description": "Name of the form",
+            "example": "Form Title"
+          }
+        }
       }
     }
   },
@@ -1995,6 +2059,56 @@
           },
           "401": {
             "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/summary": {
+      "get": {
+        "summary": "Get submissions summary",
+        "description": "Retrieve a summary of submissions filtered by title and accessibility.",
+        "tags": [
+          "Submissions"
+        ],
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "description": "Search submissions by form title",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Form"
+            }
+          },
+          {
+            "name": "accessibility",
+            "in": "query",
+            "description": "Filter by accessibility type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "public",
+                "private"
+              ],
+              "example": "public"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with submission summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionsSummaryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
           }
         }
       }

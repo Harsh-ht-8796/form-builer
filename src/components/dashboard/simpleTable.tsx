@@ -1,5 +1,6 @@
 "use client";
 
+import { SummaryItem } from "@/api/model";
 import {
   Table,
   TableBody,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { FormData } from "@/types/dashboard/simple-table";
 
-const SimpleTable = ({ filteredData }: { filteredData: FormData[] }) => {
+const SimpleTable = ({ filteredData }: { filteredData: SummaryItem[] }) => {
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden">
       <Table>
@@ -27,14 +28,14 @@ const SimpleTable = ({ filteredData }: { filteredData: FormData[] }) => {
         <TableBody>
           {filteredData.map((form) => (
             <TableRow
-              key={form.id}
+              key={`${form._id?.formId}_${form._id?.accessibility}`}
               className="border-b border-gray-100 hover:bg-gray-50"
             >
               <TableCell className="py-4 px-6 font-medium text-gray-900">
                 {form.formName}
               </TableCell>
               <TableCell className="py-4 px-6 text-right text-gray-700 font-medium">
-                {form.responses}
+                {form.responseCount}
               </TableCell>
             </TableRow>
           ))}

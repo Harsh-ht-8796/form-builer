@@ -6,6 +6,6 @@ import { Suspense } from "react";
 
 export default function DashboardPage() {
   return (<Suspense fallback={<DashboardSkeleton />}>
-    <Dashboard />;
+    <Dashboard />
   </Suspense>)
 }
