@@ -21,41 +21,28 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { Fragment, ReactNode } from "react";
 import { Separator } from "../ui/separator";
+import { useParams } from "next/navigation";
+import { useGetApiV1FormsId } from "@/api/formAPI";
+import { FieldCard } from "./FieldCard";
 
-// Mock data
-const pieChartData = [
-  { name: "Chrome", value: 40, fill: "#FF6B6B" },
-  { name: "Firefox", value: 30, fill: "#4ECDC4" },
-  { name: "Safari", value: 20, fill: "#45B7D1" },
-  { name: "Other", value: 10, fill: "#96CEB4" },
-];
+// Mock API hook for field responses (replace with actual API hook)
+const useGetApiV1FormsFieldResponses = (formId: string, fieldId: string) => {
+  // Simulate API response data for each field
+  const mockResponses: Record<string, any> = {
+    "1755688384625": ["Response 1", "Response 2", "Response 3", "Response 4"],
+    "1755690965072": [
+      { name: "Option 1", value: 40, fill: "#FF6B6B" },
+      { name: "Option 2", value: 30, fill: "#4ECDC4" },
+      { name: "Option 3", value: 20, fill: "#45B7D1" },
+    ],
+  };
 
-const verticalBarData = [
-  { option: "Option A", value: 50 },
-  { option: "Option B", value: 30 },
-  { option: "Option C", value: 20 },
-];
-
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-];
-
-const tags = Array.from({ length: 50 }).map(
-  (_, i, a) => `v1.2.0-beta.${a.length - i}`
-);
-
-const chartConfig = {
-  name: {
-    label: "Visitors",
-  },
-  value: {
-    label: "Chrome",
-    color: "var(--chart-1)",
-  },
-} satisfies ChartConfig;
+  return {
+    data: mockResponses[fieldId] || [],
+    isLoading: false,
+    error: null,
+  };
+};
 
 // Define interfaces for data types
 interface PieChartData {
@@ -74,8 +61,8 @@ interface HorizontalBarData {
   desktop: number;
 }
 
-// Define card configuration interface with discriminated union
 interface CardConfig {
+  id: string;
   title: string;
   description: string;
   responses: number;
@@ -83,44 +70,57 @@ interface CardConfig {
   data: PieChartData[] | VerticalBarData[] | HorizontalBarData[] | string[];
 }
 
-// Card configurations
-const cardConfigs: CardConfig[] = [
-  {
-    type: "pie",
-    title: "Questions 1",
-    description: "Description",
-    responses: 4,
-    data: pieChartData,
+const chartConfig = {
+  name: {
+    label: "Visitors",
   },
-  {
-    type: "short-answer",
-    title: "Short answer",
-    description: "",
-    responses: 4,
-    data: tags,
+  value: {
+    label: "Option",
+    color: "var(--chart-1)",
   },
-  {
-    type: "long-answer",
-    title: "Long answer",
-    description: "",
-    responses: 4,
-    data: tags,
-  },
-  {
-    type: "horizontal-bar",
-    title: "Questions 2",
-    description: "Description",
-    responses: 0,
-    data: chartData,
-  },
-  {
-    type: "vertical-bar",
-    title: "Questions 2",
-    description: "Description",
-    responses: 0,
-    data: verticalBarData,
-  },
-];
+} satisfies ChartConfig;
+
+// Map field types to card config and data
+const mapFieldToCardConfig = (
+  field: any,
+  responseData: any
+): CardConfig => {
+  switch (field.type) {
+    case "short-text":
+      return {
+        id: field.id,
+        type: "short-answer",
+        title: field.title,
+        description: "",
+        responses: responseData?.length || 0,
+        data: responseData || [],
+      };
+    case "multiple-choice":
+      return {
+        id: field.id,
+        type: "pie",
+        title: field.title,
+        description: "",
+        responses: responseData?.length || 0,
+        data:
+          responseData ||
+          field.options.map((option: string, index: number) => ({
+            name: option,
+            value: 0,
+            fill: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4"][index % 4],
+          })),
+      };
+    default:
+      return {
+        id: field.id,
+        type: "short-answer",
+        title: field.title,
+        description: "",
+        responses: 0,
+        data: [],
+      };
+  }
+};
 
 // Render chart based on card type
 const renderChart = (card: CardConfig) => {
@@ -128,7 +128,7 @@ const renderChart = (card: CardConfig) => {
     case "pie":
       return (
         <>
-          <ChartContainer config={chartConfig} className="h-[300px]">
+          <ChartContainer config={chartConfig} >
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <ChartTooltip
@@ -219,7 +219,6 @@ const renderChart = (card: CardConfig) => {
           </ResponsiveContainer>
         </ChartContainer>
       );
-    case "long-answer":
     case "short-answer":
       return (
         <div className="flex flex-col">
@@ -227,8 +226,8 @@ const renderChart = (card: CardConfig) => {
             Short answer
           </h1>
           <ScrollArea className="h-100 py-1 rounded-md border">
-            {(card.data as string[]).map((tag) => (
-              <Fragment key={tag}>
+            {(card.data as string[]).map((tag, index) => (
+              <Fragment key={index}>
                 <div className="text-sm px-2">{tag}</div>
                 <Separator className="my-2" />
               </Fragment>
@@ -242,38 +241,16 @@ const renderChart = (card: CardConfig) => {
 };
 
 export function SummaryView() {
+  const { id } = useParams();
+  const { data: formDetails } = useGetApiV1FormsId(String(id), {
+    query: {
+      enabled: !!id,
+    },
+  });
+
   return (
     <div className="grid grid-cols-2 gap-6">
-      {cardConfigs.map((card, index) => (
-        <Card key={index} className="border border-gray-200">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {card.type === "short-answer" && (
-                  <div className="bg-[#F3E8FF] p-3 rounded-sm border border-gray-200">
-                    <div className="space-y-0.5">
-                      <div className="w-4 h-0.5 bg-purple-600 rounded-full"></div>
-                      <div className="w-2 h-0.5 bg-purple-600 rounded-full"></div>
-                    </div>
-                  </div>
-                )}
-                <CardTitle className="text-lg font-semibold">
-                  {card.title}
-                </CardTitle>
-              </div>
-              {card.responses > 0 && (
-                <span className="text-sm text-[#6B778C] font-normal">
-                  {card.responses} responses
-                </span>
-              )}
-            </div>
-            {card.description && (
-              <p className="text-sm text-gray-500">{card.description}</p>
-            )}
-          </CardHeader>
-          <CardContent>{renderChart(card)}</CardContent>
-        </Card>
-      ))}
+      {formDetails?.fields?.map((field) => <FieldCard key={field._id} field={field} formId={String(id)} />)}
     </div>
   );
 }
