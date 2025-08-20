@@ -27,6 +27,7 @@ import type {
   Form,
   FormRequest,
   FormResponse,
+  FormSubmissionResponse,
   GetApiV1FormsFormIdVisibility200,
   GetApiV1FormsReceivedParams,
   GetApiV1FormsSearch200,
@@ -55,7 +56,6 @@ import type {
   PostApiV1UsersUploadImagesBody,
   PutApiV1FormsFormIdUpdateVisibilityBody,
   PutApiV1Users200,
-  QuestionResponse,
   ReceivedFormsResponse,
   RegisterRequest,
   RegisterResponse,
@@ -3657,14 +3657,14 @@ export function useGetApiV1SubmissionsFormFormIdFields<
 }
 
 /**
- * @summary Get field question results with users per option
+ * @summary Retrieve form entries or field results with pagination
  */
 export const getApiV1SubmissionsFormFormIdFieldsQuestion = (
   formId: string,
-  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  params: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
   signal?: AbortSignal,
 ) => {
-  return customInstance<QuestionResponse>({
+  return customInstance<FormSubmissionResponse>({
     url: `/api/v1/submissions/form/${formId}/fields/question`,
     method: "GET",
     params,
@@ -3689,7 +3689,7 @@ export const getGetApiV1SubmissionsFormFormIdFieldsQuestionQueryOptions = <
   TError = ErrorType<unknown>,
 >(
   formId: string,
-  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  params: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -3737,7 +3737,7 @@ export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
   TError = ErrorType<unknown>,
 >(
   formId: string,
-  params: undefined | GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  params: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -3770,7 +3770,7 @@ export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
   TError = ErrorType<unknown>,
 >(
   formId: string,
-  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  params: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -3803,7 +3803,7 @@ export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
   TError = ErrorType<unknown>,
 >(
   formId: string,
-  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  params: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -3818,7 +3818,7 @@ export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
- * @summary Get field question results with users per option
+ * @summary Retrieve form entries or field results with pagination
  */
 
 export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
@@ -3828,7 +3828,7 @@ export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
   TError = ErrorType<unknown>,
 >(
   formId: string,
-  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  params: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
