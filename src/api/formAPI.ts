@@ -31,12 +31,15 @@ import type {
   GetApiV1FormsReceivedParams,
   GetApiV1FormsSearch200,
   GetApiV1FormsSearchParams,
+  GetApiV1SubmissionsFormFormIdFieldsParams,
+  GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
   GetApiV1SubmissionsFormIdIndividualParams,
   GetApiV1SubmissionsSummaryParams,
   GetApiV1Users200,
   GetApiV1UsersByOrgParams,
   GetApiV1UsersId200,
   GetOrganizationByIdResponse,
+  GetSubmissionsByFieldResponse,
   OrganizationDetail,
   OrganizationUpdateRequest,
   OverviewCardsResponse,
@@ -52,6 +55,7 @@ import type {
   PostApiV1UsersUploadImagesBody,
   PutApiV1FormsFormIdUpdateVisibilityBody,
   PutApiV1Users200,
+  QuestionResponse,
   ReceivedFormsResponse,
   RegisterRequest,
   RegisterResponse,
@@ -3458,6 +3462,392 @@ export function useGetApiV1SubmissionsFormIdIndividual<
     params,
     options,
   );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Returns submissions for a specific form field, including answers, field details, and pagination metadata.
+ * @summary Get submissions by form field
+ */
+export const getApiV1SubmissionsFormFormIdFields = (
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsParams,
+  signal?: AbortSignal,
+) => {
+  return customInstance<GetSubmissionsByFieldResponse>({
+    url: `/api/v1/submissions/form/${formId}/fields`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetApiV1SubmissionsFormFormIdFieldsQueryKey = (
+  formId?: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsParams,
+) => {
+  return [
+    `/api/v1/submissions/form/${formId}/fields`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetApiV1SubmissionsFormFormIdFieldsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiV1SubmissionsFormFormIdFieldsQueryKey(formId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>
+  > = ({ signal }) =>
+    getApiV1SubmissionsFormFormIdFields(formId, params, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!formId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1SubmissionsFormFormIdFieldsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>
+>;
+export type GetApiV1SubmissionsFormFormIdFieldsQueryError = ErrorType<unknown>;
+
+export function useGetApiV1SubmissionsFormFormIdFields<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params: undefined | GetApiV1SubmissionsFormFormIdFieldsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsFormFormIdFields<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsFormFormIdFields<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get submissions by form field
+ */
+
+export function useGetApiV1SubmissionsFormFormIdFields<
+  TData = Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFields>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1SubmissionsFormFormIdFieldsQueryOptions(
+    formId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Get field question results with users per option
+ */
+export const getApiV1SubmissionsFormFormIdFieldsQuestion = (
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  signal?: AbortSignal,
+) => {
+  return customInstance<QuestionResponse>({
+    url: `/api/v1/submissions/form/${formId}/fields/question`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetApiV1SubmissionsFormFormIdFieldsQuestionQueryKey = (
+  formId?: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+) => {
+  return [
+    `/api/v1/submissions/form/${formId}/fields/question`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetApiV1SubmissionsFormFormIdFieldsQuestionQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+  >,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiV1SubmissionsFormFormIdFieldsQuestionQueryKey(formId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>
+  > = ({ signal }) =>
+    getApiV1SubmissionsFormFormIdFieldsQuestion(formId, params, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!formId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1SubmissionsFormFormIdFieldsQuestionQueryResult =
+  NonNullable<
+    Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>
+  >;
+export type GetApiV1SubmissionsFormFormIdFieldsQuestionQueryError =
+  ErrorType<unknown>;
+
+export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+  >,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params: undefined | GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+  >,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+  >,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get field question results with users per option
+ */
+
+export function useGetApiV1SubmissionsFormFormIdFieldsQuestion<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>
+  >,
+  TError = ErrorType<unknown>,
+>(
+  formId: string,
+  params?: GetApiV1SubmissionsFormFormIdFieldsQuestionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1SubmissionsFormFormIdFieldsQuestion>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiV1SubmissionsFormFormIdFieldsQuestionQueryOptions(
+      formId,
+      params,
+      options,
+    );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

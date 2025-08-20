@@ -887,6 +887,157 @@
             "$ref": "#/components/schemas/PaginationMeta"
           }
         }
+      },
+      "GetSubmissionsByFieldResponse": {
+        "type": "object",
+        "properties": {
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubmissionFieldResponse"
+            }
+          },
+          "field": {
+            "$ref": "#/components/schemas/FormField"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/FieldMeta"
+          }
+        }
+      },
+      "SubmissionFieldResponse": {
+        "type": "object",
+        "properties": {
+          "submissionId": {
+            "type": "string",
+            "example": "68a41daa53e0a89d7cbfae3c"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-19T06:46:02.053Z"
+          },
+          "answer": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Option 2"
+            ]
+          }
+        }
+      },
+      "FieldMeta": {
+        "type": "object",
+        "properties": {
+          "fieldIndex": {
+            "type": "integer",
+            "example": 0
+          },
+          "fieldId": {
+            "type": "string",
+            "example": "1755584702451"
+          },
+          "totalSubmissions": {
+            "type": "integer",
+            "example": 2
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 2
+          },
+          "page": {
+            "type": "integer",
+            "example": 0
+          },
+          "limit": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "UserOfOption": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6870d9b6d62b21e6fe89a9a8"
+          },
+          "email": {
+            "type": "string",
+            "example": "your.email@example.com"
+          }
+        }
+      },
+      "ResultOption": {
+        "type": "object",
+        "properties": {
+          "option": {
+            "type": "string",
+            "example": "Option 1"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOfOption"
+            }
+          }
+        }
+      },
+      "FieldQuestion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1755584705754"
+          },
+          "title": {
+            "type": "string",
+            "example": "Type your question here"
+          },
+          "type": {
+            "type": "string",
+            "example": "checkbox"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "Option 1"
+            }
+          }
+        }
+      },
+      "QuestionMeta": {
+        "type": "object",
+        "properties": {
+          "totalSubmissions": {
+            "type": "integer",
+            "example": 2
+          },
+          "fieldIndex": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "QuestionResponse": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/FieldQuestion"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultOption"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/QuestionMeta"
+          }
+        }
       }
     }
   },
@@ -2320,6 +2471,99 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SubmissionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/form/{formId}/fields": {
+      "get": {
+        "summary": "Get submissions by form field",
+        "description": "Returns submissions for a specific form field, including answers, field details, and pagination metadata.",
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with submissions for the field",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSubmissionsByFieldResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/form/{formId}/fields/question": {
+      "get": {
+        "summary": "Get field question results with users per option",
+        "tags": [
+          "Submissions"
+        ],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question field with results and users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionResponse"
                 }
               }
             }
