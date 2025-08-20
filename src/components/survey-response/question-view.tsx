@@ -100,7 +100,7 @@ export function QuestionView() {
                   <ScrollArea className="h-100 py-1 rounded-md border">
                     {questioWiseAnswer?.results.map((response) => (
                       <Fragment key={response.submissionId}>
-                        <div className="text-sm px-2">{response.answer?.join("")}</div>
+                        <div className="text-sm px-2">{response.answer as unknown as string}</div>
                         <Separator className="my-2" />
                       </Fragment>
                     ))}
