@@ -3,7 +3,7 @@
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import type React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
 import moment from "moment";
 import { debounce } from "lodash";
 
@@ -14,15 +14,10 @@ interface DateRange {
   to: Date | null;
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Initialize dateRange state from URL query parameters if present
   const [dateRange, setDateRange] = useState<DateRange>({
     from: searchParams.get("fromDate")
       ? moment(searchParams.get("fromDate"), "DD-MM-YYYY").toDate()
@@ -32,7 +27,6 @@ export default function DashboardLayout({
       : null,
   });
 
-  // Debounced function to update URL with date range
   const debouncedUpdateUrl = useMemo(
     () =>
       debounce((range: DateRange) => {
@@ -52,7 +46,6 @@ export default function DashboardLayout({
     [router, searchParams]
   );
 
-  // Handle date range changes
   const handleDateRangeChange = useCallback(
     (range: DateRange) => {
       setDateRange(range);
@@ -61,7 +54,6 @@ export default function DashboardLayout({
     [debouncedUpdateUrl]
   );
 
-  // Clean up debounced function on component unmount
   useEffect(() => {
     return () => {
       debouncedUpdateUrl.cancel();
@@ -80,5 +72,13 @@ export default function DashboardLayout({
       </div>
       <div>{children}</div>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent>{children}</DashboardContent>
+    </Suspense>
   );
 }

@@ -3,8 +3,9 @@ import type React from "react"
 
 
 import LoginComponent from "@/components/login"
+import { Suspense } from "react";
 
-export default  function LoginPage() {
+export default function LoginPage() {
   // const [email, setEmail] = useState("")
   // const [password, setPassword] = useState("")
   // const [loading, setLoading] = useState(false)
@@ -25,10 +26,12 @@ export default  function LoginPage() {
   // const handleGoogleLogin = () => {
   //   toast.info("Google OAuth integration coming soon!")
   // }
- 
+
 
 
   return (
-    <LoginComponent />
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginComponent />
+    </Suspense>
   )
 }

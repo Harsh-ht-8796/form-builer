@@ -57,62 +57,100 @@ declare module "next-auth/jwt" {
 
 async function getUserFromDb<LoginResponse>(email: string, password: string) {
     try {
-        const response = await axios.post<LoginResponse>(process.env.NEXT_PUBLIC_API_BASE_URL + "/api/v1/auth/login", {
-            email,
-            password,
-        }, {
-            headers: {
-                "Content-Type": "application/json"
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/login`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
             }
-        });
-        return response.data;
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            console.error("Error during API call:", errorData || response.statusText);
+            throw new Error("Failed to authenticate user.");
+        }
+
+        return (await response.json()) as LoginResponse;
     } catch (error: any) {
-        console.error("Error during API call:", error.response?.data || error.message);
+        console.error("Error during API call:", error.message);
         throw new Error("Failed to authenticate user.");
     }
 }
 
-async function getUserFromDbRegister<User>(username: string, email: string, password: string) {
+async function getUserFromDbRegister<User>(
+    username: string,
+    email: string,
+    password: string
+) {
     try {
-        const response = await axios.post<User>(process.env.NEXT_PUBLIC_API_BASE_URL + "/api/v1/auth/register", {
-            username,
-            email,
-            password,
-            roles: ["super_admin"]
-        }, {
-            headers: {
-                "Content-Type": "application/json"
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/register`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password,
+                    roles: ["super_admin"],
+                }),
             }
-        });
-        return response.data;
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            console.error("Error during API call:", errorData || response.statusText);
+            throw new Error("Failed to register user.");
+        }
+
+        return (await response.json()) as User;
     } catch (error: any) {
-        console.error("Error during API call:", error.response?.data || error.message);
-        throw new Error("Failed to authenticate user.");
+        console.error("Error during API call:", error.message);
+        throw new Error("Failed to register user.");
     }
 }
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
     try {
-        const response = await axios.post<{ tokens: { access: { token: string; expires: number }; refresh: { token: string; expire: number } } }>(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh-tokens`,
-            { refreshToken: token.refreshToken },
-            { headers: { "Content-Type": "application/json" } }
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refreshToken: token.refreshToken }),
+            }
         );
 
-        const refreshedTokens = response.data;
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            console.error("Error refreshing token:", errorData || response.statusText);
+            return {
+                ...token,
+                error: "RefreshAccessTokenError",
+            };
+        }
+
+        const refreshedTokens = (await response.json()) as {
+            tokens: {
+                access: { token: string; expires: number };
+                refresh: { token: string; expire: number };
+            };
+        };
 
         return {
             ...token,
             accessToken: refreshedTokens.tokens.access.token,
             accessTokenExpires: refreshedTokens.tokens.access.expires,
             refreshToken: refreshedTokens.tokens.refresh.token,
-            error: undefined
+            error: undefined,
         };
     } catch (error: any) {
-        console.error("Error refreshing token:", error.response?.data || error.message);
+        console.error("Error refreshing token:", error.message);
         return {
             ...token,
-            error: "RefreshAccessTokenError"
+            error: "RefreshAccessTokenError",
         };
     }
 }
