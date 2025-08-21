@@ -5,7 +5,9 @@ import authConfig from './auth.config';
 const { auth } = NextAuth(authConfig);
 
 // API base URL (use environment variable in production)
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL + '/api/v1';
+
+console.log({ API_BASE_URL })
 
 // Optional: Server-side Bearer token (if not using user token)
 const API_TOKEN = process.env.FORM_API_TOKEN; // Set in .env
@@ -24,7 +26,7 @@ export default auth(async (req) => {
         try {
             // Use the user's token from NextAuth session, or fallback to server-side token
             const token = req.auth?.user.accessToken || API_TOKEN;
-
+            console.log({ API_BASE_URL: `${API_BASE_URL}/forms/${formId}/user-view` })
             // Call the endpoint to check form visibility
             const response = await fetch(`${API_BASE_URL}/forms/${formId}/user-view`, {
                 method: 'GET',

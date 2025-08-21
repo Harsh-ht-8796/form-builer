@@ -46,7 +46,9 @@ const chartConfig = {
 
 // Map field types to card config and data
 const mapFieldToCardConfig = (field: any, responseData: any): CardConfig => {
+    console.log({ type: field.type })
     switch (field.type) {
+        case "long-text":
         case "short-text":
             return {
                 id: field.id,
@@ -190,7 +192,8 @@ export function FieldCard({ field, formId }: FieldCardProps) {
                     let shortTextarr: string[] = []
 
                     if (data.field.type === "short-text" || data.field.type === "long-text") {
-                        shortTextarr = data?.results?.map((result: any) => result?.answer)
+                        shortTextarr = data?.results?.map((result: any) => result?.answer);
+                        console.log({ shortTextarr })
                         return { ...data, text_arr: shortTextarr }
                     }
 

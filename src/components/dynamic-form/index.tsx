@@ -46,20 +46,7 @@ export default function DynamicForm() {
   const { mutateAsync: submitUserForm } = usePostApiV1SubmissionsFormFormId()
 
   const form = useForm<FormData>({
-    defaultValues: async () => {
-      const response = await fetch("/api/question/1");
-      const data = await response.json();
-      console.log(data);
-      const setDefaultValues: Record<string, any> = {};
-      data.questions.forEach((question: Question) => {
-        if (question.type === "checkbox") {
-          setDefaultValues[question.id] = [];
-        } else {
-          setDefaultValues[question.id] = "";
-        }
-      });
-      return setDefaultValues;
-    },
+
 
     // defaultValues: {
     //     [formData.questions[0].id]: "",
