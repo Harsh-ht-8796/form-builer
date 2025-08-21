@@ -1,13 +1,11 @@
 import GitHub from "next-auth/providers/github"
 import type { NextAuthConfig } from "next-auth"
-
 import Credentials from "next-auth/providers/credentials";
 import { registerSchema, signInSchema } from "@/lib/zod";
 import { ZodError } from "zod";
 import axios from "axios";
 import { JWT } from "next-auth/jwt";
 import { RegisterResponse, User } from "./api/model";
-
 
 declare module "next-auth" {
     interface Session {
@@ -22,7 +20,9 @@ declare module "next-auth" {
             orgId: string;
             accessToken: string;
             refreshToken: string;
+            accessTokenExpires?: number; // Made optional
         };
+        error?: string; // Added error property
     }
 
     interface User {
@@ -35,6 +35,7 @@ declare module "next-auth" {
         orgId: string;
         accessToken: string;
         refreshToken: string;
+        accessTokenExpires?: number; // Made optional
     }
 }
 
@@ -49,12 +50,14 @@ declare module "next-auth/jwt" {
         orgId: string;
         accessToken: string;
         refreshToken: string;
+        accessTokenExpires?: number; // Made optional
+        error?: string;
     }
 }
 
 async function getUserFromDb<LoginResponse>(email: string, password: string) {
     try {
-        const response = await axios.post<LoginResponse>(process.env.NEXT_PUBLIC_API_BASE_URL+"/api/v1/auth/login", {
+        const response = await axios.post<LoginResponse>(process.env.NEXT_PUBLIC_API_BASE_URL + "/api/v1/auth/login", {
             email,
             password,
         }, {
@@ -71,7 +74,7 @@ async function getUserFromDb<LoginResponse>(email: string, password: string) {
 
 async function getUserFromDbRegister<User>(username: string, email: string, password: string) {
     try {
-        const response = await axios.post<User>(process.env.NEXT_PUBLIC_API_BASE_URL+"/api/v1/auth/register", {
+        const response = await axios.post<User>(process.env.NEXT_PUBLIC_API_BASE_URL + "/api/v1/auth/register", {
             username,
             email,
             password,
@@ -87,13 +90,38 @@ async function getUserFromDbRegister<User>(username: string, email: string, pass
         throw new Error("Failed to authenticate user.");
     }
 }
+
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+    try {
+        const response = await axios.post<{ tokens: { access: { token: string; expires: number }; refresh: { token: string; expire: number } } }>(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/refresh-tokens`,
+            { refreshToken: token.refreshToken },
+            { headers: { "Content-Type": "application/json" } }
+        );
+
+        const refreshedTokens = response.data;
+
+        return {
+            ...token,
+            accessToken: refreshedTokens.tokens.access.token,
+            accessTokenExpires: refreshedTokens.tokens.access.expires,
+            refreshToken: refreshedTokens.tokens.refresh.token,
+            error: undefined
+        };
+    } catch (error: any) {
+        console.error("Error refreshing token:", error.response?.data || error.message);
+        return {
+            ...token,
+            error: "RefreshAccessTokenError"
+        };
+    }
+}
+
 export default {
     providers: [
         GitHub,
         Credentials({
             name: "Credentials",
-            // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-            // e.g. domain, username, password, 2FA token, etc.
             credentials: {
                 email: {
                     value: "v7@yopmail.com",
@@ -102,14 +130,10 @@ export default {
                     value: "Test@123",
                 },
             },
-
             authorize: async (credentials, req) => {
                 try {
                     let response = null;
                     const { email, password } = await signInSchema.parseAsync(credentials);
-                    // logic to salt and hash password
-
-                    // logic to verify if the user exists
                     response = await getUserFromDb<RegisterResponse>(email, password);
 
                     if (!response) {
@@ -117,7 +141,6 @@ export default {
                     }
                     const { user, tokens } = response;
 
-                    // return JSON object with the user data
                     return {
                         id: String(user?.id),
                         email: String(user?.email),
@@ -126,24 +149,20 @@ export default {
                         roles: Array.isArray(user?.roles) ? user.roles : [],
                         orgId: String(user?.orgId),
                         profileImage: String(user?.profileImage),
-                        accessToken: String(tokens?.access?.token), // include token for session use
-                        refreshToken: String(tokens?.refresh?.token), // include token for session use
+                        accessToken: String(tokens?.access?.token),
+                        refreshToken: String(tokens?.refresh?.token),
+                        accessTokenExpires: tokens?.access?.expires // Optional in return type
                     };
                 } catch (error) {
                     if (error instanceof ZodError) {
-                        // Return `null` to indicate that the credentials are invalid
                         return null;
                     }
                     return null;
                 }
             },
-
-
         }),
         Credentials({
             name: "register-credentials",
-            // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-            // e.g. domain, username, password, 2FA token, etc.
             credentials: {
                 name: {
                     value: "v7@yopmail.com",
@@ -155,22 +174,17 @@ export default {
                     value: "Test@123",
                 },
             },
-
             authorize: async (credentials, req) => {
                 try {
                     let response = null;
                     const { name, email, password } = await registerSchema.parseAsync(credentials);
-                    // logic to salt and hash password
-
-                    // logic to verify if the user exists
                     response = await getUserFromDbRegister<RegisterResponse>(name, email, password);
 
                     if (!response) {
                         return null;
                     }
                     const { user, tokens } = response;
-                    // user?.profileImage
-                    // return JSON object with the user data
+
                     return {
                         id: String(user?.id),
                         email: String(user?.email),
@@ -179,25 +193,23 @@ export default {
                         roles: Array.isArray(user?.roles) ? user.roles : [],
                         orgId: String(user?.orgId),
                         profileImage: String(user?.profileImage),
-                        accessToken: String(tokens?.access?.token), // include token for session use
-                        refreshToken: String(tokens?.refresh?.token), // include token for session use
+                        accessToken: String(tokens?.access?.token),
+                        refreshToken: String(tokens?.refresh?.token),
+                        accessTokenExpires: tokens?.access?.expires // Optional in return type
                     };
                 } catch (error) {
                     if (error instanceof ZodError) {
-                        // Return `null` to indicate that the credentials are invalid
                         return null;
                     }
                     return null;
                 }
             },
-
         }),
     ],
     pages: {
-
-        signIn: "/auth/login", // Displayed when no user is authenticated
-        signOut: "/", // Displayed when user signs out
-        error: "/auth/error", // Error code passed in query string as ?error=
+        signIn: "/auth/login",
+        signOut: "/",
+        error: "/auth/error",
     },
     debug: process.env.NODE_ENV === "development",
     session: {
@@ -205,7 +217,6 @@ export default {
     },
     callbacks: {
         async jwt({ token, user }) {
-
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
@@ -214,9 +225,17 @@ export default {
                 token.roles = user.roles;
                 token.orgId = user.orgId;
                 token.profileImage = user.profileImage;
-                token.accessToken = user.accessToken; // you'll manually assign this in `authorize`
-                token.refreshToken = user.refreshToken; // you'll manually assign this in `authorize`
+                token.accessToken = user.accessToken;
+                token.refreshToken = user.refreshToken;
+                token.accessTokenExpires = user.accessTokenExpires;
             }
+
+            // Check if access token is expired
+            const currentTime = Math.floor(Date.now() / 1000);
+            if (token.accessTokenExpires && currentTime >= token.accessTokenExpires) {
+                return await refreshAccessToken(token);
+            }
+
             return token;
         },
         async redirect({ url, baseUrl }) {
@@ -226,11 +245,9 @@ export default {
         },
         authorized({ auth }) {
             const isAuthenticated = !!auth?.user;
-
             return isAuthenticated;
         },
-        session({ session, token, user }) {
-
+        session({ session, token }) {
             if (token) {
                 session.user.id = token.id;
                 session.user.email = token.email;
@@ -241,11 +258,14 @@ export default {
                 session.user.orgId = token.orgId;
                 session.user.accessToken = token.accessToken;
                 session.user.refreshToken = token.refreshToken;
+                session.user.accessTokenExpires = token.accessTokenExpires;
+
+                if (token?.error) {
+                    session.error = token.error;
+                }
             }
             return session;
         },
-
     },
-
-    secret: process.env.AUTH_SECREAT,
+    secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig
