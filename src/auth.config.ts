@@ -180,7 +180,7 @@ export default {
                         orgId: String(user?.orgId),
                         profileImage: String(user?.profileImage),
                         accessToken: String(tokens?.access?.token), // include token for session use
-                        refreshToken: String(tokens?.access?.token), // include token for session use
+                        refreshToken: String(tokens?.refresh?.token), // include token for session use
                     };
                 } catch (error) {
                     if (error instanceof ZodError) {
