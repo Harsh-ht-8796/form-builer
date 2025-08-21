@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, Fragment } from "react";
-import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { useRouter, usePathname, useParams } from "next/navigation";
 import { useSession, getSession } from "next-auth/react";
 import axios from "axios";
@@ -27,8 +26,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/lib/actions/auth";
-import { Form, FormField, FormFieldType, FormRequest, PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem } from "@/api/model";
-import { putApiV1FormsFormIdUpdateVisibility, useGetApiV1FormsFormIdVisibility, usePostApiV1FormsUploadImagesId, usePutApiV1FormsFormIdUpdateVisibility, usePutApiV1FormsId } from "@/api/formAPI";
+import { Form, FormFieldType, FormRequest, PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem } from "@/api/model";
+import { useGetApiV1FormsFormIdVisibility, usePostApiV1FormsUploadImagesId, usePutApiV1FormsFormIdUpdateVisibility, usePutApiV1FormsId } from "@/api/formAPI";
 import { ButtonLists, uploadFileType } from "@/types/dashboard/components/form-builder";
 import { FormTitle } from "./form-title";
 import { EmptyState } from "./empty-state";
@@ -37,143 +36,15 @@ import { QuestionBuilder } from "./question-builder";
 import { SubmitButton } from "./submit-button";
 import Image from "next/image";
 import { Dialog } from "../ui/dialog";
-import { questionTypes } from "@/constants/question-types";
-import FileUploadPopup from "../common/file-upload-popup";
+import { useFormStore } from "@/store/formStore";
+import { useForm } from "react-hook-form";
 
-// Types
-interface FormInputs {
-  selectedTheme: string;
-  formTitle: string;
-  formDescription: string;
-  questions: FormField[];
-  coverImageUrl?: string | null;
-  logoImageUrl?: string | null;
-}
-
-interface HeaderProps {
-  pathname: string;
-  session: any;
-  onSaveDraft: () => void;
-  onOpenSharePopup: () => void;
-  onLogout: () => Promise<void>;
-}
-
-interface FormContentProps {
-  buttonLists: ButtonLists;
-  coverImageUrl: string | null | undefined;
-  logoImageUrl: string | null | undefined;
-  selectedTheme: string;
-  formTitle: string;
-  formDescription: string;
-  fields: FormField[];
-  showQuestionTypes: boolean;
-  draggedQuestion: string | null;
-  register: any;
-  setValue: any;
-  control: any;
-  hideButtons: (key: keyof ButtonLists) => void;
-  setShowQuestionTypes: (value: boolean) => void;
-  addQuestion: (type: FormFieldType) => void;
-  updateQuestion: (index: number, updates: Partial<FormField>) => void;
-  deleteQuestion: (index: number) => void;
-  addOption: (index: number) => void;
-  updateOption: (index: number, optionIndex: number, value: string) => void;
-  handleDragStart: (e: React.DragEvent, questionId: string) => void;
-  handleDragOver: (e: React.DragEvent) => void;
-  handleDrop: (e: React.DragEvent, targetIndex: number) => void;
-  handleDragEnd: () => void;
-  handleRequiredToggle: (index: number, checked: boolean) => void;
-  duplicateQuestion: (index: number) => void;
-  uploadFile: (file: File, type: uploadFileType) => Promise<void>;
-}
-
-// Header Component
-const Header: React.FC<HeaderProps> = ({
-  pathname,
-  session,
-  onSaveDraft,
-  onOpenSharePopup,
-  onLogout,
-}) => {
-  const router = useRouter();
-
-  return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-      <SidebarTrigger className="-ml-1" />
-      <SelectSeparator className="mr-2 h-4" />
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-bold text-gray-900">logo</h1>
-          <Breadcrumb>
-            <BreadcrumbList>
-              {pathname
-                .split("/")
-                .filter(Boolean)
-                .map((item, index) => (
-                  <Fragment key={index}>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink
-                        href={item}
-                        className="text-gray-500 capitalize"
-                      >
-                        {item}
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    {index < pathname.split("/").filter(Boolean).length - 1 ? (
-                      <BreadcrumbSeparator />
-                    ) : null}
-                  </Fragment>
-                ))}
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={onSaveDraft}>
-            Save As Draft
-          </Button>
-          <Button variant="outline">Result</Button>
-          <Button variant="default" onClick={onOpenSharePopup}>
-            Publish
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar className="cursor-pointer">
-                <AvatarImage
-                  className="size-8 rounded-full bg-purple-100"
-                  src={
-                    session?.user?.profileImage
-                      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${session.user?.profileImage}`
-                      : "https://github.com/shadcn.png"
-                  }
-                  alt="@shadcn"
-                />
-                <AvatarFallback className="text-purple-700 text-center font-medium">
-                  CN
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push("/profile")}>
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </header>
-  );
-};
 
 
 import { Facebook, Link, Linkedin, MessageCircle, Twitter } from "lucide-react";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import FileUploadPopup from "../common/file-upload-popup";
 
 interface SharePopupProps {
   onClose: () => void;
@@ -391,6 +262,124 @@ export const SharePopup: React.FC<SharePopupProps> = ({ onClose, onPublish }) =>
     </DialogContent>
   );
 };
+
+// Types
+interface FormInputs {
+  selectedTheme: string;
+  formTitle: string;
+  formDescription: string;
+  coverImageUrl?: string | null;
+  logoImageUrl?: string | null;
+}
+
+interface HeaderProps {
+  pathname: string;
+  session: any;
+  onSaveDraft: () => void;
+  onOpenSharePopup: () => void;
+  onLogout: () => Promise<void>;
+}
+
+interface FormContentProps {
+  buttonLists: ButtonLists;
+  coverImageUrl: string | null | undefined;
+  logoImageUrl: string | null | undefined;
+  selectedTheme: string;
+  formTitle: string;
+  formDescription: string;
+  showQuestionTypes: boolean;
+  draggedQuestion: string | null;
+  register: any;
+  setValue: any;
+  hideButtons: (key: keyof ButtonLists) => void;
+  setShowQuestionTypes: (value: boolean) => void;
+  handleDragStart: (e: React.DragEvent, questionId: string) => void;
+  handleDragOver: (e: React.DragEvent) => void;
+  handleDrop: (e: React.DragEvent, targetIndex: number) => void;
+  handleDragEnd: () => void;
+  uploadFile: (file: File, type: uploadFileType) => Promise<void>
+}
+
+// Header Component
+const Header: React.FC<HeaderProps> = ({
+  pathname,
+  session,
+  onSaveDraft,
+  onOpenSharePopup,
+  onLogout,
+}) => {
+  const router = useRouter();
+
+  return (
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <SidebarTrigger className="-ml-1" />
+      <SelectSeparator className="mr-2 h-4" />
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-xl font-bold text-gray-900">logo</h1>
+          <Breadcrumb>
+            <BreadcrumbList>
+              {pathname
+                .split("/")
+                .filter(Boolean)
+                .map((item, index) => (
+                  <Fragment key={index}>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href={item} className="text-gray-500 capitalize">
+                        {item}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    {index < pathname.split("/").filter(Boolean).length - 1 ? (
+                      <BreadcrumbSeparator />
+                    ) : null}
+                  </Fragment>
+                ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" onClick={onSaveDraft}>
+            Save As Draft
+          </Button>
+          <Button variant="outline">Result</Button>
+          <Button variant="default" onClick={onOpenSharePopup}>
+            Publish
+          </Button>
+          <Button variant="ghost" size="icon">
+            <Bell className="h-5 w-5" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Avatar className="cursor-pointer">
+                <AvatarImage
+                  className="size-8 rounded-full bg-purple-100"
+                  src={
+                    session?.user?.profileImage
+                      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${session.user?.profileImage}`
+                      : "https://github.com/shadcn.png"
+                  }
+                  alt="@shadcn"
+                />
+                <AvatarFallback className="text-purple-700 text-center font-medium">
+                  CN
+                </AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push("/profile")}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </header>
+  );
+};
+
 // Form Content Component
 const FormContent: React.FC<FormContentProps> = ({
   buttonLists,
@@ -399,39 +388,27 @@ const FormContent: React.FC<FormContentProps> = ({
   selectedTheme,
   formTitle,
   formDescription,
-  fields,
   showQuestionTypes,
   draggedQuestion,
   register,
   setValue,
-  control,
   hideButtons,
   setShowQuestionTypes,
-  addQuestion,
-  updateQuestion,
-  deleteQuestion,
-  addOption,
-  updateOption,
   handleDragStart,
   handleDragOver,
   handleDrop,
   handleDragEnd,
-  handleRequiredToggle,
-  duplicateQuestion,
-  uploadFile,
+  uploadFile
 }) => {
+  const { questions } = useFormStore();
+
   return (
     <div className="flex flex-1 flex-col gap-4 bg-[#EFEFEF]">
       <div className="bg-gray-100">
         {!buttonLists.cover && (
           <div className="relative h-38 bg-pink-200">
             {coverImageUrl && (
-              <Image
-                src={coverImageUrl}
-                alt="Background"
-                fill
-                className="object-cover"
-              />
+              <Image src={coverImageUrl} alt="Background" fill className="object-cover" />
             )}
             <div className="absolute bottom-4 right-4">
               <FileUploadPopup<FormInputs>
@@ -443,7 +420,6 @@ const FormContent: React.FC<FormContentProps> = ({
                 onRemove={() => hideButtons("cover")}
               >
                 <Button
-                  onClick={() => console.log("Clicked on cover")}
                   className="bg-white text-gray-800 hover:bg-gray-50"
                 >
                   <FileTextIcon className="mr-2 h-4 w-4" />
@@ -456,16 +432,12 @@ const FormContent: React.FC<FormContentProps> = ({
         {buttonLists.cover && !buttonLists.logo && (
           <div className="relative h-32 bg-[#EFEFEF]">
             {coverImageUrl && (
-              <Image
-                src={coverImageUrl}
-                alt="Background"
-                fill
-                className="object-cover"
-              />
+              <Image src={coverImageUrl} alt="Background" fill className="object-cover" />
             )}
           </div>
         )}
         <div className="relative bg-[#EFEFEF] min-h-[calc(100vh-192px)] pt-16">
+
           {!buttonLists.logo && (
             <div className="absolute -top-16 left-4 md:left-1/4 md:-translate-x-1/2 cursor-pointer">
               <FileUploadPopup<FormInputs>
@@ -495,17 +467,16 @@ const FormContent: React.FC<FormContentProps> = ({
                   buttonLists={buttonLists}
                   hideButtons={hideButtons}
                 />
-                {fields.length === 0 && selectedTheme && (
+                {questions.length === 0 && selectedTheme && (
                   <EmptyState
                     theme={selectedTheme}
                     showQuestionTypes={showQuestionTypes}
                     onShowQuestionTypesChange={setShowQuestionTypes}
-                    onAddQuestion={addQuestion}
                   />
                 )}
-                {fields.length > 0 && (
+                {questions.length > 0 && (
                   <div className="space-y-8">
-                    {fields.map((question, index) => (
+                    {questions.map((question, index) => (
                       <QuestionCard
                         key={question.id}
                         question={question}
@@ -514,35 +485,18 @@ const FormContent: React.FC<FormContentProps> = ({
                         draggedQuestion={draggedQuestion}
                         onDragStart={handleDragStart}
                         onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, index)}
+                        onDrop={handleDrop}
                         onDragEnd={handleDragEnd}
-                        onUpdateQuestion={(index, updates) =>
-                          updateQuestion(index, updates)
-                        }
-                        onDeleteQuestion={() => deleteQuestion(index)}
-                        onAddOption={() => addOption(index)}
-                        onUpdateOption={(index, optionIndex, value) =>
-                          updateOption(index, optionIndex, value)
-                        }
-                        onDuplicateQuestion={() => duplicateQuestion(index)}
-                        handleRequiredToggle={(index, checked) =>
-                          handleRequiredToggle(index, checked)
-                        }
                       />
                     ))}
                     <QuestionBuilder
                       showQuestionTypes={showQuestionTypes}
                       onShowQuestionTypesChange={setShowQuestionTypes}
-                      onAddQuestion={addQuestion}
                     />
                   </div>
                 )}
-                {fields.length > 0 && selectedTheme && (
-                  <SubmitButton
-                    theme={selectedTheme}
-                    label="Submit"
-                    onSubmit={() => { }}
-                  />
+                {questions.length > 0 && selectedTheme && (
+                  <SubmitButton theme={selectedTheme} label="Submit" onSubmit={() => { }} />
                 )}
               </div>
             </div>
@@ -559,8 +513,9 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { id } = useParams();
+  const { setQuestions } = useFormStore();
 
-  const { register, handleSubmit, setValue, watch, control } = useForm<FormInputs>({
+  const { register, handleSubmit, setValue, watch } = useForm<FormInputs>({
     defaultValues: async () => {
       try {
         const session = await getSession();
@@ -572,11 +527,14 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
             },
           }
         );
+        setQuestions(data?.fields || []);
+        setButtonLists(prevstate => {
+          return { ...prevstate, logo: !data?.logoImage, cover: !data?.coverImage }
+        })
         return {
           selectedTheme: data?.settings?.backgroundColor || "cyan",
           formTitle: data?.title || "Form Title",
           formDescription: data?.description || "Form Description",
-          questions: data?.fields || [],
           coverImageUrl: data?.coverImage
             ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${data.coverImage}`
             : null,
@@ -585,7 +543,7 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
             : null,
         };
       } catch (e) {
-        console.log(e);
+        console.error("Error fetching form:", e);
         return {
           selectedTheme: "cyan",
           formTitle: "Form Title",
@@ -600,13 +558,8 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
 
   const { mutateAsync: uploadImages } = usePostApiV1FormsUploadImagesId();
   const { mutateAsync: updateForm } = usePutApiV1FormsId();
+  const { questions } = useFormStore();
 
-  const { fields, append, remove, swap, update } = useFieldArray({
-    control,
-    name: "questions",
-  });
-
-  const [showQuestionTypes, setShowQuestionTypes] = useState(false);
   const [draggedQuestion, setDraggedQuestion] = useState<string | null>(null);
   const [buttonLists, setButtonLists] = useState<ButtonLists>({
     logo: true,
@@ -614,6 +567,7 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
     background: true,
   });
   const [isSharePopupOpen, setIsSharePopupOpen] = useState(false);
+  const [showQuestionTypes, setShowQuestionTypes] = useState(false);
 
   const selectedTheme = watch("selectedTheme");
   const formTitle = watch("formTitle");
@@ -651,52 +605,6 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
     if (key === "cover") setValue("coverImageUrl", null);
   };
 
-  const addQuestion = (type: FormFieldType) => {
-    const findfieldType = questionTypes.find((q) => q.id === type);
-    const newQuestion: FormField = {
-      id: Date.now().toString(),
-      type,
-      order: fields.length + 1,
-      fieldType: findfieldType?.fieldType,
-      title: "Type your question here",
-      options:
-        type === "multiple-choice" || type === "dropdown" || type === "checkbox"
-          ? ["Option 1", "Option 2", "Option 3"]
-          : [],
-      required: false,
-    };
-    append(newQuestion);
-    setShowQuestionTypes(false);
-  };
-
-  const updateQuestion = (index: number, updates: Partial<FormField>) => {
-    update(index, { ...fields[index], ...updates });
-  };
-
-  const deleteQuestion = (index: number) => {
-    remove(index);
-  };
-
-  const addOption = (index: number) => {
-    const question = fields[index];
-    if (question) {
-      const newOptions = [
-        ...(question.options || []),
-        `Option ${(question?.options?.length || 0) + 1}`,
-      ];
-      update(index, { ...question, options: newOptions });
-    }
-  };
-
-  const updateOption = (index: number, optionIndex: number, value: string) => {
-    const question = fields[index];
-    if (question) {
-      const newOptions = [...(question.options || [])];
-      newOptions[optionIndex] = value;
-      update(index, { ...question, options: newOptions });
-    }
-  };
-
   const handleDragStart = (e: React.DragEvent, questionId: string) => {
     setDraggedQuestion(questionId);
     e.dataTransfer.effectAllowed = "move";
@@ -710,12 +618,12 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
     if (!draggedQuestion) return;
-    const draggedIndex = fields.findIndex((q) => q.id === draggedQuestion);
+    const draggedIndex = questions.findIndex((q) => q.id === draggedQuestion);
     if (draggedIndex === -1 || targetIndex === -1) {
       setDraggedQuestion(null);
       return;
     }
-    swap(draggedIndex, targetIndex);
+    useFormStore.getState().swapQuestions(draggedIndex, targetIndex);
     setDraggedQuestion(null);
   };
 
@@ -723,35 +631,25 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
     setDraggedQuestion(null);
   };
 
-  const handleRequiredToggle = (index: number, checked: boolean) => {
-    update(index, { ...fields[index], required: checked });
-  };
-
-  const duplicateQuestion = (index: number) => {
-    const original = fields[index];
-    const duplicated = {
-      ...original,
-      id: Date.now().toString(),
-    };
-    append(duplicated);
-    swap(fields.length, index + 1);
-  };
-
-  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+  const onSubmit = async (data: FormInputs) => {
     const formData: FormRequest = {
       title: data.formTitle,
       description: data.formDescription,
-      fields: data.questions,
+      fields: questions,
       settings: {
         backgroundColor: data.selectedTheme,
       },
       status: "draft",
     };
-    await updateForm({
-      id: String(id),
-      data: formData,
-    });
-    router.push(`/draft`);
+    try {
+      await updateForm({
+        id: String(id),
+        data: formData,
+      });
+      router.push(`/draft`);
+    } catch (error) {
+      console.error("Error saving form:", error);
+    }
   };
 
   const handleLogout = async () => {
@@ -760,8 +658,13 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
   };
 
   const handlePublish = async (visibility: string, email?: string) => {
-    console.log("called published");
+    console.log("Published with visibility:", visibility, "email:", email);
   };
+
+  if (!selectedTheme) {
+    return <div>Loading...</div>
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -780,25 +683,16 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
           selectedTheme={selectedTheme}
           formTitle={formTitle}
           formDescription={formDescription}
-          fields={fields}
           showQuestionTypes={showQuestionTypes}
           draggedQuestion={draggedQuestion}
           register={register}
           setValue={setValue}
-          control={control}
           hideButtons={hideButtons}
           setShowQuestionTypes={setShowQuestionTypes}
-          addQuestion={addQuestion}
-          updateQuestion={updateQuestion}
-          deleteQuestion={deleteQuestion}
-          addOption={addOption}
-          updateOption={updateOption}
           handleDragStart={handleDragStart}
           handleDragOver={handleDragOver}
           handleDrop={handleDrop}
           handleDragEnd={handleDragEnd}
-          handleRequiredToggle={handleRequiredToggle}
-          duplicateQuestion={duplicateQuestion}
           uploadFile={uploadFile}
         />
         <Dialog open={isSharePopupOpen} onOpenChange={setIsSharePopupOpen}>

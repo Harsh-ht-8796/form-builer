@@ -1,32 +1,24 @@
-"use client";
-
-import type React from "react";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { QuestionType } from "@/types/dashboard/components/form-builder";
+import React from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { FormFieldType } from "@/api/model";
+import { QuestionType } from "@/types/dashboard/components/form-builder";
 
 interface QuestionTypePopoverProps {
-  children: React.ReactNode;
   open: boolean;
-  questionTypes: QuestionType[];
   onOpenChange: (open: boolean) => void;
-  onSelectType: (type: FormFieldType, id?: string) => void;
+  onSelectType: (type: FormFieldType) => void;
+  questionTypes: QuestionType[];
   id?: string;
+  children: React.ReactNode
 }
 
-export function QuestionTypePopover({
-  children,
+export const QuestionTypePopover: React.FC<QuestionTypePopoverProps> = ({
   open,
-  questionTypes,
   onOpenChange,
   onSelectType,
-  id,
-}: QuestionTypePopoverProps) {
+  questionTypes,
+  children,
+}) => {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
@@ -39,7 +31,7 @@ export function QuestionTypePopover({
               return (
                 <button
                   key={type.id}
-                  onClick={() => onSelectType(type.id, id)}
+                  onClick={() => onSelectType(type.id)}
                   className="w-full flex items-center space-x-3 rounded-lg hover:bg-gray-50 text-left transition-colors"
                 >
                   <IconComponent className="w-5 h-5 text-slate-500" />
@@ -59,4 +51,4 @@ export function QuestionTypePopover({
       </PopoverContent>
     </Popover>
   );
-}
+};

@@ -1,28 +1,34 @@
-"use client";
-
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { QuestionTypePopover } from "@/components/form-builder/question-type-popover";
-import { questionTypes } from "@/constants/question-types";
 import { FormFieldType } from "@/api/model";
+import { questionTypes } from "@/constants/question-types";
+import { useFormStore } from "@/store/formStore";
+import { QuestionTypePopover } from "./question-type-popover";
+import { Plus } from "lucide-react";
 
 interface QuestionBuilderProps {
   showQuestionTypes: boolean;
-  onShowQuestionTypesChange: (show: boolean) => void;
-  onAddQuestion: (type: FormFieldType) => void;
+  onShowQuestionTypesChange: (value: boolean) => void;
 }
 
-export function QuestionBuilder({
+export const QuestionBuilder: React.FC<QuestionBuilderProps> = ({
   showQuestionTypes,
   onShowQuestionTypesChange,
-  onAddQuestion,
-}: QuestionBuilderProps) {
+}) => {
+  const { addQuestion } = useFormStore();
+
+  const handleAddQuestion = (type: FormFieldType) => {
+    console.log("Adding question from builder:", type); // Debug log
+    addQuestion(type);
+    onShowQuestionTypesChange(false);
+  };
+
   return (
     <div className="flex items-center mb-6">
       <QuestionTypePopover
         open={showQuestionTypes}
         onOpenChange={onShowQuestionTypesChange}
-        onSelectType={onAddQuestion}
+        onSelectType={handleAddQuestion}
         questionTypes={questionTypes}
       >
         <Button
@@ -36,4 +42,4 @@ export function QuestionBuilder({
       <span className="text-[#D9D9D9] font-semibold text-lg">Add a question</span>
     </div>
   );
-}
+};

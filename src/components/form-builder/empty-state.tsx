@@ -7,21 +7,27 @@ import { cn } from "@/lib/utils";
 import { QuestionTypePopover } from "@/components/form-builder/question-type-popover";
 import { questionTypes } from "@/constants/question-types";
 import { FormFieldType } from "@/api/model";
+import { useFormStore } from "@/store/formStore";
 
 interface EmptyStateProps {
   theme: string;
-  onAddQuestion: (type: FormFieldType) => void;
   showQuestionTypes: boolean;
   onShowQuestionTypesChange: (show: boolean) => void;
 }
 
 export function EmptyState({
   theme,
-  onAddQuestion,
   showQuestionTypes,
   onShowQuestionTypesChange,
 }: EmptyStateProps) {
-  console.log({ theme })
+  const { addQuestion } = useFormStore();
+
+  const handleAddQuestion = (type: FormFieldType) => {
+    console.log("Adding question of type:", type); // Debug log
+    addQuestion(type);
+    onShowQuestionTypesChange(false);
+  };
+
   return (
     <div className="text-center py-12 rounded-lg">
       <div className="text-slate-400 mb-4">
@@ -36,7 +42,7 @@ export function EmptyState({
       <QuestionTypePopover
         open={showQuestionTypes}
         onOpenChange={onShowQuestionTypesChange}
-        onSelectType={onAddQuestion}
+        onSelectType={handleAddQuestion}
         questionTypes={questionTypes}
       >
         <Button

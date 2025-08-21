@@ -25,10 +25,10 @@ import {
 } from "@/components/ui/form";
 import { ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Question } from "@/types/dashboard/components/form-builder";
 import { useGetApiV1FormsIdUserView, usePostApiV1SubmissionsFormFormId } from "@/api/formAPI";
 import { FormField as FormFieldType } from "@/api/model";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 
 type FormData = {
   [key: string]: any;
@@ -37,7 +37,7 @@ type FormData = {
 export default function DynamicForm() {
 
   const { id } = useParams()
-  const { data: dynamicForm } = useGetApiV1FormsIdUserView(String(id), {
+  const { data: dynamicForm, isLoading } = useGetApiV1FormsIdUserView(String(id), {
     query: {
       enabled: !!id
     }
@@ -311,11 +311,19 @@ export default function DynamicForm() {
 
   const sortedQuestions = dynamicForm?.fields?.sort((a, b) => Number(a?.order) - Number(b?.order));
 
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
   return (
     <div className="min-h-screen bg-white">
       {/* Header with yellow background and pencils - Responsive */}
-      <div className="relative h-24 sm:h-32 md:h-40 bg-gradient-to-r from-yellow-400 to-yellow-500 overflow-hidden" />
 
+      {/*  */}
+      {dynamicForm?.coverImage ? (
+        <div className="relative h-32 bg-[#EFEFEF]">
+          <Image src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${dynamicForm.coverImage}`} alt="Background" fill className="object-cover" />
+        </div>
+      ) : <div className="relative h-24 sm:h-32 md:h-40 bg-gradient-to-r from-yellow-400 to-yellow-500 overflow-hidden" />}
       {/* Form Content - Responsive Container */}
       <div className="w-full relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 md:pb-16">
 
