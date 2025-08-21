@@ -215,12 +215,12 @@ export default function SentFormsPage() {
       accessorKey: "sentTo",
       header: "Sent To",
       cell: ({ row }: any) => {
-        const allowedEmails = row.getValue("allowedEmails");
-        const allowedDomains = row.getValue("allowedDomains");
+        const allowedEmails = row.getValue("allowedEmails") || [];
+        const allowedDomains = row.getValue("allowedDomains") || [];
         return (
           <div className="flex items-center gap-4">
-            {allowedEmails.length > 1 ? allowedEmails.at(0) + " + 1" : allowedEmails.at(0)}
-            {allowedDomains.length > 1 ? allowedDomains.at(0) + " + 1" : allowedDomains.at(0)}
+            {allowedEmails?.length > 1 ? allowedEmails.at(0) + " + 1" : allowedEmails.at(0)}
+            {allowedDomains?.length > 1 ? allowedDomains.at(0) + " + 1" : allowedDomains.at(0)}
           </div>
         );
       },
