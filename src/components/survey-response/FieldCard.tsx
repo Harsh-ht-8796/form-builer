@@ -1,81 +1,48 @@
-"use client";
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    ChartConfig,
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
-} from "@/components/ui/chart";
-import {
-    PieChart,
-    Pie,
-    Cell,
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    ResponsiveContainer,
-    LabelList,
-} from "recharts";
-import { ScrollArea } from "../ui/scroll-area";
-import { Fragment, ReactNode } from "react";
-import { Separator } from "../ui/separator";
-
-// Mock API hook for field responses (replace with actual API hook)
-const useGetApiV1FormsFieldResponses = (formId: string, fieldId: string) => {
-    // Simulate API response data for each field
-    const mockResponses: Record<string, any> = {
-        "1755688384625": ["Response 1", "Response 2", "Response 3", "Response 4"],
-        "1755690965072": [
-            { name: "Option 1", value: 40, fill: "#FF6B6B" },
-            { name: "Option 2", value: 30, fill: "#4ECDC4" },
-            { name: "Option 3", value: 20, fill: "#45B7D1" },
-        ],
-    };
-
-    return {
-        data: mockResponses[fieldId] || [],
-        isLoading: false,
-        error: null,
-    };
-};
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Fragment } from "react"
+import { Separator } from "@/components/ui/separator"
+import { useGetApiV1SubmissionsFormFormIdFieldFieldIdAnswers } from "@/api/formAPI"
 
 // Define interfaces for data types
 interface PieChartData {
-    name: string;
-    value: number;
-    fill: string;
+    name: string
+    value: number
+    fill: string
 }
 
 interface VerticalBarData {
-    option: string;
-    value: number;
+    option: string
+    value: number
 }
 
 interface HorizontalBarData {
-    month: string;
-    desktop: number;
+    month: string
+    desktop: number
 }
 
 interface CardConfig {
-    id: string;
-    title: string;
-    description: string;
-    responses: number;
-    type: string;
-    data: PieChartData[] | VerticalBarData[] | HorizontalBarData[] | string[];
+    id: string
+    title: string
+    description: string
+    responses: number
+    type: string
+    data: PieChartData[] | VerticalBarData[] | HorizontalBarData[] | string[]
 }
 
+// Colors matching the original PieChart component
+const COLORS = ["#6B46C1", "#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD"]
+
 const chartConfig = {
-    name: {
-        label: "Visitors",
-    },
     value: {
-        label: "Option",
-        color: "var(--chart-1)",
+        label: "Percentage",
+        color: "#6B46C1",
     },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 // Map field types to card config and data
 const mapFieldToCardConfig = (field: any, responseData: any): CardConfig => {
@@ -85,169 +52,171 @@ const mapFieldToCardConfig = (field: any, responseData: any): CardConfig => {
                 id: field.id,
                 type: "short-answer",
                 title: field.title,
-                description: "",
+                description: "Breakdown by department percentage",
                 responses: responseData?.length || 0,
-                data: responseData || [],
-            };
+                data: responseData?.text_arr || [],
+            }
         case "multiple-choice":
             return {
                 id: field.id,
                 type: "pie",
                 title: field.title,
-                description: "",
-                responses: responseData?.length || 0,
+                description: "Breakdown by department percentage",
+                responses: responseData?.mcq_arry?.length || 0,
                 data:
-                    responseData ||
+                    responseData?.mcq_arry ||
                     field.options.map((option: string, index: number) => ({
                         name: option,
                         value: 0,
-                        fill: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4"][index % 4],
+                        fill: COLORS[index % COLORS.length],
                     })),
-            };
+            }
         default:
             return {
                 id: field.id,
                 type: "short-answer",
                 title: field.title,
-                description: "",
+                description: "Breakdown by department percentage",
                 responses: 0,
                 data: [],
-            };
+            }
     }
-};
+}
 
-// Render chart based on card type
+const RADIAN = Math.PI / 180
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }: any) => {
+    // Only show labels for slices with significant percentage
+    if (percent < 0.05) return null
+
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+    const x = cx + radius * Math.cos(-midAngle * RADIAN)
+    const y = cy + radius * Math.sin(-midAngle * RADIAN)
+
+    return (
+        <text
+            x={x}
+            y={y}
+            fill="white"
+            textAnchor={x > cx ? "start" : "end"}
+            dominantBaseline="central"
+            className="font-semibold text-xs drop-shadow-sm"
+        >
+            {`${(percent * 100).toFixed(0)}%`}
+        </text>
+    )
+}
+
 const renderChart = (card: CardConfig) => {
     switch (card.type) {
         case "pie":
             return (
-                <>
-                    <ChartContainer config={chartConfig} >
+                <div className="w-full flex flex-col items-center">
+                    <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[400px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <ChartTooltip
-                                    content={<ChartTooltipContent nameKey="name" hideLabel />}
-                                />
+                            <PieChart margin={{ top: 20, right: 20, bottom: 60, left: 20 }}>
                                 <Pie
                                     data={card.data as PieChartData[]}
                                     cx="50%"
-                                    cy="50%"
-                                    innerRadius={0}
-                                    outerRadius={80}
-                                    paddingAngle={2}
-                                    dataKey="value"
-                                    label={({ value }) => `${value}%`}
+                                    cy="45%"
                                     labelLine={false}
+                                    label={renderCustomizedLabel}
+                                    outerRadius="80%"
+                                    innerRadius="0%"
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                    stroke="#ffffff"
+                                    strokeWidth={2}
                                 >
-                                    <LabelList
-                                        dataKey="name"
-                                        className="fill-background"
-                                        stroke="none"
-                                        fontSize={12}
-                                        formatter={(value: ReactNode) =>
-                                            chartConfig[value as keyof typeof chartConfig]?.label || value
-                                        }
-                                    />
                                     {(card.data as PieChartData[]).map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                     ))}
                                 </Pie>
-                                <ChartTooltip content={<ChartTooltipContent />} />
+                                <ChartTooltip
+                                    content={<ChartTooltipContent />}
+                                    formatter={(value: any, name: string) => [`${value}%`, name]}
+                                />
+                                <Legend
+                                    verticalAlign="bottom"
+                                    height={50}
+                                    iconType="circle"
+                                    wrapperStyle={{
+                                        paddingTop: "20px",
+                                        fontSize: "14px",
+                                        textAlign: "center",
+                                    }}
+                                    layout="horizontal"
+                                    align="center"
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </ChartContainer>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mt-4">
-                        {(card.data as PieChartData[]).map((item, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <div
-                                    className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: item.fill }}
-                                ></div>
-                                <span className="text-gray-600">{item.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </>
-            );
-        case "horizontal-bar":
-            return (
-                <ChartContainer config={chartConfig}>
-                    <BarChart
-                        accessibilityLayer
-                        data={card.data as HorizontalBarData[]}
-                        layout="vertical"
-                        margin={{ left: -20 }}
-                    >
-                        <XAxis type="number" dataKey="desktop" hide />
-                        <YAxis
-                            dataKey="month"
-                            type="category"
-                            tickLine={false}
-                            tickMargin={10}
-                            axisLine={false}
-                            tickFormatter={(value) =>
-                                typeof value === "string" ? value.substring(0, 3) : value
-                            }
-                        />
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
-                        />
-                        <Bar dataKey="desktop" fill="#7C3AED" radius={4} />
-                    </BarChart>
-                </ChartContainer>
-            );
-        case "vertical-bar":
-            return (
-                <ChartContainer config={chartConfig} className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                            data={card.data as VerticalBarData[]}
-                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                        >
-                            <XAxis dataKey="option" axisLine={false} tickLine={false} />
-                            <YAxis hide />
-                            <Bar dataKey="value" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </ChartContainer>
-            );
+                </div>
+            )
+        case "long-anser":
         case "short-answer":
             return (
                 <div className="flex flex-col">
-                    <h1 className="text-base text-[#464F56] font-medium py-2">
-                        Short answer
-                    </h1>
-                    <ScrollArea className="h-100 py-1 rounded-md border">
-                        {(card.data as string[]).map((tag, index) => (
-                            <Fragment key={index}>
-                                <div className="text-sm px-2">{tag}</div>
-                                <Separator className="my-2" />
-                            </Fragment>
-                        ))}
+                    <h1 className="text-base text-[#464F56] font-medium py-2">Short answer</h1>
+                    <ScrollArea className="h-[350px] py-1 rounded-md border">
+                        <div className="p-3 space-y-3">
+                            {(card.data as string[]).map((response, index) => (
+                                <Fragment key={index}>
+                                    <div className="text-sm text-gray-700 leading-relaxed">{response}</div>
+                                    {index < (card.data as string[]).length - 1 && <Separator className="my-2" />}
+                                </Fragment>
+                            ))}
+                        </div>
                     </ScrollArea>
                 </div>
-            );
+            )
         default:
-            return null;
+            return null
     }
-};
+}
 
 interface FieldCardProps {
-    field: any;
-    formId: string;
+    field: any
+    formId: string
 }
 
 export function FieldCard({ field, formId }: FieldCardProps) {
-    // Fetch response data for the field
-    const { data: responseData, isLoading } = useGetApiV1FormsFieldResponses(formId, String(field.id));
+    const { data: summaryOfField, isLoading } = useGetApiV1SubmissionsFormFormIdFieldFieldIdAnswers(
+        String(formId),
+        String(field.id),
+        {
+            query: {
+                enabled: Boolean(formId && field.id),
+                select: (data) => {
+                    let shortTextarr: string[] = []
 
-    // Generate card config for the field
-    const card = mapFieldToCardConfig(field, responseData);
+                    if (data.field.type === "short-text" || data.field.type === "long-text") {
+                        shortTextarr = data?.results?.map((result: any) => result?.answer)
+                        return { ...data, text_arr: shortTextarr }
+                    }
+
+                    const totalUsers = data.results.reduce((sum, r) => sum + r.users.length, 0)
+                    const target = data.field.options.map((opt, i) => {
+                        const result = data.results.find((r) => r.option === opt)
+                        const count = result ? result.users.length : 0
+                        const value = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0
+
+                        return {
+                            name: opt,
+                            value,
+                            fill: COLORS[i % COLORS.length],
+                        }
+                    })
+
+                    return { ...data, mcq_arry: target }
+                },
+            },
+        },
+    )
+
+    const card = mapFieldToCardConfig(field, summaryOfField)
 
     return (
-        <Card key={card.id} className="border border-gray-200">
+        <Card key={card.id} className="border border-gray-200 shadow-sm">
             <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -261,19 +230,19 @@ export function FieldCard({ field, formId }: FieldCardProps) {
                         )}
                         <CardTitle className="text-lg font-semibold">{card.title}</CardTitle>
                     </div>
-                    {card.responses > 0 && (
-                        <span className="text-sm text-[#6B778C] font-normal">
-                            {card.responses} responses
-                        </span>
-                    )}
+                    {card.responses > 0 && <span className="text-sm text-[#6B778C] font-normal">{card.responses} responses</span>}
                 </div>
-                {card.description && (
-                    <p className="text-sm text-gray-500">{card.description}</p>
-                )}
+                {card.description && <p className="text-sm text-gray-500">{card.description}</p>}
             </CardHeader>
-            <CardContent>
-                {isLoading ? <div>Loading responses...</div> : renderChart(card)}
+            <CardContent className="pt-0">
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-32">
+                        <div className="text-sm text-gray-500">Loading responses...</div>
+                    </div>
+                ) : (
+                    renderChart(card)
+                )}
             </CardContent>
         </Card>
-    );
+    )
 }

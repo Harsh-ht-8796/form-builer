@@ -21,6 +21,7 @@ declare module "next-auth" {
             profileImage: string;
             orgId: string;
             accessToken: string;
+            refreshToken: string;
         };
     }
 
@@ -33,6 +34,7 @@ declare module "next-auth" {
         profileImage: string;
         orgId: string;
         accessToken: string;
+        refreshToken: string;
     }
 }
 
@@ -46,12 +48,13 @@ declare module "next-auth/jwt" {
         roles: string[];
         orgId: string;
         accessToken: string;
+        refreshToken: string;
     }
 }
 
 async function getUserFromDb<LoginResponse>(email: string, password: string) {
     try {
-        const response = await axios.post<LoginResponse>("http://localhost:5000/api/v1/auth/login", {
+        const response = await axios.post<LoginResponse>(process.env.NEXT_PUBLIC_API_BASE_URL+"/api/v1/auth/login", {
             email,
             password,
         }, {
@@ -68,7 +71,7 @@ async function getUserFromDb<LoginResponse>(email: string, password: string) {
 
 async function getUserFromDbRegister<User>(username: string, email: string, password: string) {
     try {
-        const response = await axios.post<User>("http://localhost:5000/api/v1/auth/register", {
+        const response = await axios.post<User>(process.env.NEXT_PUBLIC_API_BASE_URL+"/api/v1/auth/register", {
             username,
             email,
             password,
@@ -124,6 +127,7 @@ export default {
                         orgId: String(user?.orgId),
                         profileImage: String(user?.profileImage),
                         accessToken: String(tokens?.access?.token), // include token for session use
+                        refreshToken: String(tokens?.refresh?.token), // include token for session use
                     };
                 } catch (error) {
                     if (error instanceof ZodError) {
@@ -176,6 +180,7 @@ export default {
                         orgId: String(user?.orgId),
                         profileImage: String(user?.profileImage),
                         accessToken: String(tokens?.access?.token), // include token for session use
+                        refreshToken: String(tokens?.access?.token), // include token for session use
                     };
                 } catch (error) {
                     if (error instanceof ZodError) {
@@ -210,6 +215,7 @@ export default {
                 token.orgId = user.orgId;
                 token.profileImage = user.profileImage;
                 token.accessToken = user.accessToken; // you'll manually assign this in `authorize`
+                token.refreshToken = user.refreshToken; // you'll manually assign this in `authorize`
             }
             return token;
         },
@@ -234,6 +240,7 @@ export default {
                 session.user.roles = token.roles;
                 session.user.orgId = token.orgId;
                 session.user.accessToken = token.accessToken;
+                session.user.refreshToken = token.refreshToken;
             }
             return session;
         },

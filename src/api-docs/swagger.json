@@ -2662,6 +2662,37 @@
           }
         }
       }
+    },
+      "/api/v1/submissions/form/{formId}/field/{fieldId}/answers": {
+      "get": {
+        "summary": "Get answers for a specific field in a form",
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "fieldId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Answers for a field",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormSubmissionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

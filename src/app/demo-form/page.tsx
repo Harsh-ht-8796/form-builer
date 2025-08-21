@@ -1,178 +1,101 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "sonner"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-export default function DemoFormPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    feedback: "",
-    rating: "",
-    features: [] as string[],
-    category: "",
-  })
+const data = [
+  { name: "Human Resources", value: 28, color: "#6B46C1" },
+  { name: "Marketing", value: 25, color: "#7C3AED" },
+  { name: "Development", value: 22, color: "#8B5CF6" },
+  { name: "Sales", value: 15, color: "#A78BFA" },
+  { name: "Customer Support", value: 10, color: "#C4B5FD" },
+]
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    toast.success("Thank you for your feedback! Form submitted successfully.")
-  }
+const chartConfig = {
+  humanResources: {
+    label: "Human Resources",
+    color: "#6B46C1",
+  },
+  marketing: {
+    label: "Marketing",
+    color: "#7C3AED",
+  },
+  development: {
+    label: "Development",
+    color: "#8B5CF6",
+  },
+  sales: {
+    label: "Sales",
+    color: "#A78BFA",
+  },
+  customerSupport: {
+    label: "Customer Support",
+    color: "#C4B5FD",
+  },
+}
 
-  const handleFeatureChange = (feature: string, checked: boolean) => {
-    if (checked) {
-      setFormData((prev) => ({
-        ...prev,
-        features: [...prev.features, feature],
-      }))
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        features: prev.features.filter((f) => f !== feature),
-      }))
-    }
-  }
+const RADIAN = Math.PI / 180
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+  const x = cx + radius * Math.cos(-midAngle * RADIAN)
+  const y = cy + radius * Math.sin(-midAngle * RADIAN)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="container mx-auto max-w-2xl">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Product Feedback Form</CardTitle>
-            <CardDescription>Help us improve our platform by sharing your thoughts and experiences.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor={x > cx ? "start" : "end"}
+      dominantBaseline="central"
+      className="font-medium text-sm"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  )
+}
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+export default function Component() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background p-8">
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle>Department Distribution</CardTitle>
+          <CardDescription>Breakdown by department percentage</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={chartConfig} className="h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={renderCustomizedLabel}
+                  outerRadius={120}
+                  fill="#8884d8"
+                  dataKey="value"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General Feedback</SelectItem>
-                    <SelectItem value="bug">Bug Report</SelectItem>
-                    <SelectItem value="feature">Feature Request</SelectItem>
-                    <SelectItem value="support">Support</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-3">
-                <Label>Overall Rating *</Label>
-                <RadioGroup
-                  value={formData.rating}
-                  onValueChange={(value) => setFormData({ ...formData, rating: value })}
-                  className="flex flex-col space-y-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="5" id="rating-5" />
-                    <Label htmlFor="rating-5">Excellent (5/5)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="4" id="rating-4" />
-                    <Label htmlFor="rating-4">Good (4/5)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="3" id="rating-3" />
-                    <Label htmlFor="rating-3">Average (3/5)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="2" id="rating-2" />
-                    <Label htmlFor="rating-2">Poor (2/5)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="1" id="rating-1" />
-                    <Label htmlFor="rating-1">Very Poor (1/5)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              <div className="space-y-3">
-                <Label>Which features do you find most useful? (Select all that apply)</Label>
-                <div className="space-y-2">
-                  {[
-                    "Form Builder",
-                    "Dashboard Analytics",
-                    "Team Collaboration",
-                    "Email Notifications",
-                    "Custom Themes",
-                    "Export Options",
-                  ].map((feature) => (
-                    <div key={feature} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`feature-${feature}`}
-                        checked={formData.features.includes(feature)}
-                        onCheckedChange={(checked) => handleFeatureChange(feature, checked as boolean)}
-                      />
-                      <Label htmlFor={`feature-${feature}`}>{feature}</Label>
-                    </div>
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="feedback">Additional Comments</Label>
-                <Textarea
-                  id="feedback"
-                  placeholder="Share your detailed feedback, suggestions, or any issues you've encountered..."
-                  value={formData.feedback}
-                  onChange={(e) => setFormData({ ...formData, feedback: e.target.value })}
-                  className="min-h-[120px]"
+                </Pie>
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  iconType="circle"
+                  wrapperStyle={{
+                    paddingTop: "20px",
+                    fontSize: "14px",
+                  }}
                 />
-              </div>
-
-              <Button type="submit" className="w-full">
-                Submit Feedback
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">
-            This is a demo form created with our Dynamic Form Builder Platform.{" "}
-            <a href="/auth/signup" className="text-primary hover:underline">
-              Create your own forms today!
-            </a>
-          </p>
-        </div>
-      </div>
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
     </div>
   )
 }
