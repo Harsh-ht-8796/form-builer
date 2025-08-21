@@ -23,6 +23,8 @@ import type {
 
 import type {
   DeleteApiV1UsersDeleteProfileImage200,
+  DeleteFormImageRequest,
+  DeleteFormImageResponse,
   DeleteUserResponse,
   Form,
   FormRequest,
@@ -4074,3 +4076,90 @@ export function useGetApiV1SubmissionsFormFormIdFieldFieldIdAnswers<
 
   return query;
 }
+
+/**
+ * Deletes a specific image (e.g., cover or logo) from a form.
+ * @summary Delete form image
+ */
+export const deleteApiV1FormsFormIdImage = (
+  formId: string,
+  deleteFormImageRequest: DeleteFormImageRequest,
+) => {
+  return customInstance<DeleteFormImageResponse>({
+    url: `/api/v1/forms/${formId}/image`,
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    data: deleteFormImageRequest,
+  });
+};
+
+export const getDeleteApiV1FormsFormIdImageMutationOptions = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteApiV1FormsFormIdImage>>,
+    TError,
+    { formId: string; data: DeleteFormImageRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteApiV1FormsFormIdImage>>,
+  TError,
+  { formId: string; data: DeleteFormImageRequest },
+  TContext
+> => {
+  const mutationKey = ["deleteApiV1FormsFormIdImage"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteApiV1FormsFormIdImage>>,
+    { formId: string; data: DeleteFormImageRequest }
+  > = (props) => {
+    const { formId, data } = props ?? {};
+
+    return deleteApiV1FormsFormIdImage(formId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteApiV1FormsFormIdImageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteApiV1FormsFormIdImage>>
+>;
+export type DeleteApiV1FormsFormIdImageMutationBody = DeleteFormImageRequest;
+export type DeleteApiV1FormsFormIdImageMutationError = ErrorType<null | null>;
+
+/**
+ * @summary Delete form image
+ */
+export const useDeleteApiV1FormsFormIdImage = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteApiV1FormsFormIdImage>>,
+      TError,
+      { formId: string; data: DeleteFormImageRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteApiV1FormsFormIdImage>>,
+  TError,
+  { formId: string; data: DeleteFormImageRequest },
+  TContext
+> => {
+  const mutationOptions =
+    getDeleteApiV1FormsFormIdImageMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};

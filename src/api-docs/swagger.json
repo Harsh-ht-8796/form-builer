@@ -1128,6 +1128,30 @@
           "field",
           "meta"
         ]
+      },
+      "DeleteFormImageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Image deleted successfully"
+          }
+        }
+      },
+      "DeleteFormImageRequest": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "enum": [
+              "cover",
+              "logo"
+            ]
+          }
+        },
+        "required": [
+          "image"
+        ]
       }
     }
   },
@@ -2663,7 +2687,7 @@
         }
       }
     },
-      "/api/v1/submissions/form/{formId}/field/{fieldId}/answers": {
+    "/api/v1/submissions/form/{formId}/field/{fieldId}/answers": {
       "get": {
         "summary": "Get answers for a specific field in a form",
         "parameters": [
@@ -2671,13 +2695,17 @@
             "name": "formId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "fieldId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2690,6 +2718,58 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/forms/{formId}/image": {
+      "delete": {
+        "summary": "Delete form image",
+        "description": "Deletes a specific image (e.g., cover or logo) from a form.",
+        "tags": [
+          "Forms"
+        ],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the form",
+            "schema": {
+              "type": "string",
+              "example": "68a2f03f289425f67c801f18"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteFormImageRequest"
+              },
+              "example": {
+                "image": "cover"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Image deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteFormImageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Form or image not found"
           }
         }
       }

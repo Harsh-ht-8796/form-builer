@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/lib/actions/auth";
 import { Form, FormFieldType, FormRequest, PutApiV1FormsFormIdUpdateVisibilityBodyVisibilityItem } from "@/api/model";
-import { useGetApiV1FormsFormIdVisibility, usePostApiV1FormsUploadImagesId, usePutApiV1FormsFormIdUpdateVisibility, usePutApiV1FormsId } from "@/api/formAPI";
+import { getGetApiV1FormsIdQueryKey, useDeleteApiV1FormsFormIdImage, useGetApiV1FormsFormIdVisibility, usePostApiV1FormsUploadImagesId, usePutApiV1FormsFormIdUpdateVisibility, usePutApiV1FormsId } from "@/api/formAPI";
 import { ButtonLists, uploadFileType } from "@/types/dashboard/components/form-builder";
 import { FormTitle } from "./form-title";
 import { EmptyState } from "./empty-state";
@@ -45,6 +45,7 @@ import { Facebook, Link, Linkedin, MessageCircle, Twitter } from "lucide-react";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import FileUploadPopup from "../common/file-upload-popup";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SharePopupProps {
   onClose: () => void;
@@ -402,6 +403,29 @@ const FormContent: React.FC<FormContentProps> = ({
 }) => {
   const { questions } = useFormStore();
 
+  const { id } = useParams()
+  const queryClient = useQueryClient()
+
+  const { mutateAsync: removeImage } = useDeleteApiV1FormsFormIdImage()
+
+  const handleDeleteImage = async (type: "cover" | "logo") => {
+    console.log({ type, id })
+
+    await removeImage({
+      data: {
+        image: type
+      },
+      formId: String(id)
+    }, {
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: [...getGetApiV1FormsIdQueryKey(String(id))]
+        })
+        hideButtons(type)
+      }
+    })
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4 bg-[#EFEFEF]">
       <div className="bg-gray-100">
@@ -417,7 +441,7 @@ const FormContent: React.FC<FormContentProps> = ({
                 type={uploadFileType.CoverImage}
                 tempImageUrl="coverImageUrl"
                 setValue={setValue}
-                onRemove={() => hideButtons("cover")}
+                onRemove={() => handleDeleteImage("cover")}
               >
                 <Button
                   className="bg-white text-gray-800 hover:bg-gray-50"
@@ -446,7 +470,7 @@ const FormContent: React.FC<FormContentProps> = ({
                 uploadFile={uploadFile}
                 setValue={setValue}
                 tempImageUrl="logoImageUrl"
-                onRemove={() => hideButtons("logo")}
+                onRemove={() => handleDeleteImage("logo")}
               >
                 <Avatar className="size-28 ring-4 ring-white">
                   {logoImageUrl && <AvatarImage src={logoImageUrl} />}
