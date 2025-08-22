@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
 import moment from "moment";
 import { debounce } from "lodash";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const experimental_ppr = true;
 
@@ -77,7 +79,42 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Skeleton className="h-10 w-64" />
+          </div>
+          <div>
+            {/* AnalyticsCards skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-32 w-full rounded-xl" />
+              ))}
+            </div>
+
+            {/* My Forms Card skeleton */}
+            <Card className="bg-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <Skeleton className="h-7 w-32" />
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-64" />
+                    <Skeleton className="h-10 w-32" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      }
+    >
       <DashboardContent>{children}</DashboardContent>
     </Suspense>
   );

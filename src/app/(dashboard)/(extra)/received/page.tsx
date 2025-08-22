@@ -17,6 +17,7 @@ import { debounce } from "lodash";
 import moment from "moment";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DateRange {
   from: Date | null;
@@ -107,7 +108,7 @@ export default function ReceivedFormsPage() {
   }, [queryClient, queryParams]);
 
   // Fetch data using consolidated query parameters
-  const { data: forms } = useGetApiV1FormsReceived(queryParams, {
+  const { data: forms, isLoading } = useGetApiV1FormsReceived(queryParams, {
     query: {
       ...queryParams,
       select(data) {
@@ -237,16 +238,27 @@ export default function ReceivedFormsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <DataTable
-            initialState={{
-              columnVisibility: {
-                _id: false,
-                id: false,
-              },
-            }}
-            columns={columns}
-            data={forms?.docs || []}
-          />
+          {isLoading ? (
+            <div className="space-y-2">
+              {/* Table header skeleton */}
+              <Skeleton className="h-10 w-full" />
+              {/* Table rows skeletons */}
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Skeleton key={index} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : (
+            <DataTable
+              initialState={{
+                columnVisibility: {
+                  _id: false,
+                  id: false,
+                },
+              }}
+              columns={columns}
+              data={forms?.docs || []}
+            />
+          )}
         </div>
       </div>
     </div>

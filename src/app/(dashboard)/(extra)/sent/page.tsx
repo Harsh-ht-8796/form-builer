@@ -25,6 +25,7 @@ import { debounce } from "lodash";
 import { GetApiV1FormsSearchParams, GetApiV1FormsSearchStatus } from "@/api/model";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DateRange {
   from: Date | null;
@@ -129,7 +130,7 @@ export default function SentFormsPage() {
   }, [queryClient, queryParams]);
 
   // Fetch data using consolidated query parameters
-  const { data: forms } = useGetApiV1FormsSearch(queryParams);
+  const { data: forms, isLoading } = useGetApiV1FormsSearch(queryParams);
 
   // const filteredData = useCallback(() => {
   //   console.log({ docs: forms?.docs });
@@ -332,19 +333,30 @@ export default function SentFormsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <DataTable
-            columns={columns}
-            initialState={{
-              columnVisibility: {
-                _id: false,
-                id: false,
-                allowedEmails: false,
-                allowedDomains: false,
-                status: false
-              },
-            }}
-            data={forms?.docs || []}
-          />
+          {isLoading ? (
+            <div className="space-y-2">
+              {/* Table header skeleton */}
+              <Skeleton className="h-10 w-full" />
+              {/* Table rows skeletons */}
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Skeleton key={index} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              initialState={{
+                columnVisibility: {
+                  _id: false,
+                  id: false,
+                  allowedEmails: false,
+                  allowedDomains: false,
+                  status: false
+                },
+              }}
+              data={forms?.docs || []}
+            />
+          )}
         </div>
       </div>
     </div>

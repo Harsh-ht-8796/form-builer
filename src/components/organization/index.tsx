@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton"; // Shadcn UI Skeleton
 import {
   getGetApiV1UsersByOrgQueryKey,
   useDeleteApiV1UsersId,
@@ -40,7 +41,6 @@ enum Role {
   member = "member",
 }
 
-// Define interfaces for form data
 interface TeamMember {
   email: string;
   role: string;
@@ -57,10 +57,8 @@ interface QueryParams {
   page?: number;
 }
 
-
 export default function Organization() {
-
-  const { mutateAsync: deleteUser } = useDeleteApiV1UsersId()
+  const { mutateAsync: deleteUser } = useDeleteApiV1UsersId();
   const columns = [
     {
       accessorKey: "name",
@@ -85,18 +83,22 @@ export default function Organization() {
         headerClassName: "text-center",
       },
       cell: ({ row }: any) => {
-        console.log(row.getValue("_id"));
         const id = row.getValue("_id");
-        return (<div className="flex justify-center items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <Pencil className="h-4 w-4 text-gray-500" />
-          </Button>
-          <Button onClick={() => handleDeleteUser(id)} variant="ghost" size="icon">
-            <TfiTrash className="h-4 w-4 text-gray-500" />
-          </Button>
-        </div>)
-      }
-      ,
+        return (
+          <div className="flex justify-center items-center gap-2">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Pencil className="h-4 w-4 text-gray-500" />
+            </Button>
+            <Button
+              onClick={() => handleDeleteUser(id)}
+              variant="ghost"
+              size="icon"
+            >
+              <TfiTrash className="h-4 w-4 text-gray-500" />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -111,32 +113,27 @@ export default function Organization() {
 
   const { data: allroles } = useGetApiV1UsersRoles();
   const { mutateAsync: inviteUsers } = usePostApiV1OrganizationsUserInvite();
-  const { data: usersData } = useGetApiV1UsersByOrg(queryParams);
+  const { data: usersData, isLoading } = useGetApiV1UsersByOrg(queryParams);
   const queryClient = useQueryClient();
 
   const handleDeleteUser = async (id: string) => {
-    await deleteUser({
-      id
-    })
-
+    await deleteUser({ id });
     queryClient.invalidateQueries({
       queryKey: [...getGetApiV1UsersByOrgQueryKey(queryParams)],
     });
-  }
+  };
 
-  // Debounced function to update queryParams.email
   const debouncedUpdateSearchTerm = useMemo(
     () =>
       debounce((term: string) => {
         setQueryParams((prev) => ({
           ...prev,
-          email: term || undefined, // Only add email if term is truthy
+          email: term || undefined,
         }));
       }, 300),
     []
   );
 
-  // Handle search term input changes
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const term = e.target.value;
@@ -146,30 +143,31 @@ export default function Organization() {
     [debouncedUpdateSearchTerm]
   );
 
-  // Clean up debounced function on component unmount
   useEffect(() => {
     return () => {
       debouncedUpdateSearchTerm.cancel();
     };
   }, [debouncedUpdateSearchTerm]);
 
-  // Invalidate query when queryParams changes
   useEffect(() => {
     queryClient.invalidateQueries({
       queryKey: [...getGetApiV1UsersByOrgQueryKey(queryParams)],
     });
   }, [queryClient, queryParams]);
 
-  // Form for adding members
   const memberForm = useForm<TeamMember>({
     defaultValues: {
       email: "",
       role: Role.admin.toString(),
     },
   });
-  const { register: registerMember, control: controlMember, reset: resetMember, getValues: getMemberValues } = memberForm;
+  const {
+    register: registerMember,
+    control: controlMember,
+    reset: resetMember,
+    getValues: getMemberValues,
+  } = memberForm;
 
-  // Form for editing organization
   const orgForm = useForm<OrgFormData>({
     defaultValues: {
       name: "",
@@ -178,7 +176,6 @@ export default function Organization() {
   });
   const { register: registerOrg, handleSubmit: handleOrgSubmit } = orgForm;
 
-  // Reset member form and added members when dialog opens
   useEffect(() => {
     if (isAddMemberModalOpen) {
       resetMember({ email: "", role: Role.admin.toString() });
@@ -186,7 +183,6 @@ export default function Organization() {
     }
   }, [isAddMemberModalOpen, resetMember]);
 
-  // Function to add a member
   const addMember = () => {
     const currentData = getMemberValues();
     if (currentData.email && currentData.role) {
@@ -195,36 +191,65 @@ export default function Organization() {
     }
   };
 
-  // Function to handle "Done" button in add member dialog
   const handleAddMemberSubmit = async () => {
     const updateRoles = addedMembers.map((member) => ({
       email: member.email,
       roles: [member.role],
     }));
-    await inviteUsers({ data: { users: updateRoles } }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: [...getGetApiV1UsersByOrgQueryKey(queryParams)],
-        });
+    await inviteUsers(
+      { data: { users: updateRoles } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: [...getGetApiV1UsersByOrgQueryKey(queryParams)],
+          });
+        },
       }
-    });
+    );
     setIsAddMemberModalOpen(false);
   };
 
-  // Function to handle organization edit form submission
   const onOrgSubmit = (data: OrgFormData) => {
     console.log("Saved organization:", data);
     setIsModalOpen(false);
   };
 
+  // Skeleton for table
+  const renderTableSkeleton = () => (
+    <div className="space-y-4">
+      <div className="flex gap-4 px-4 py-2 border-b bg-gray-50">
+        <Skeleton className="h-6 w-1/4" />
+        <Skeleton className="h-6 w-1/4" />
+        <Skeleton className="h-6 w-1/4" />
+        <Skeleton className="h-6 w-16" />
+      </div>
+      {[...Array(5)].map((_, index) => (
+        <div key={index} className="flex gap-4 px-4 py-4 border-b">
+          <Skeleton className="h-6 w-1/4" />
+          <Skeleton className="h-6 w-1/4" />
+          <Skeleton className="h-6 w-1/4" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
-    <>
-      {(
-        <div className="min-h-screen">
-          <div className="mx-auto">
-            <Card className="bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-7xl">
+        <Card className="bg-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                {isLoading ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-7 w-48" />
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ) : (
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold text-gray-900">
@@ -235,200 +260,204 @@ export default function Organization() {
                         onClick={() => setIsModalOpen(true)}
                         variant="outline"
                       >
-                        <Edit2 />
+                        <Edit2 className="h-4 w-4" />
                       </Button>
                     </div>
                     <span className="text-sm text-gray-500">Locality</span>
                   </div>
+                )}
+              </div>
 
-                  <div className="flex items-center gap-2">
-                    <Input
-                      placeholder="Search by email..."
-                      value={searchTerm}
-                      name="email-search"
-                      onChange={handleSearchChange}
-                      className="w-full sm:w-64"
-                    />
-                    <Dialog
-                      open={isAddMemberModalOpen}
-                      onOpenChange={setIsAddMemberModalOpen}
-                    >
-                      <DialogTrigger asChild>
-                        <Button className="bg-[#7C3AED] hover:bg-[#7C3AED]/80 text-[#EFEFEF] px-6 py-2">
-                          Add New Member
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader className="flex flex-row items-center justify-between">
-                          <DialogTitle className="text-xl font-medium text-gray-700">
-                            Add Member
-                          </DialogTitle>
-                        </DialogHeader>
+              <div className="flex items-center gap-2">
+                {isLoading ? (
+                  <Skeleton className="h-10 w-64 rounded-md" />
+                ) : (
+                  <Input
+                    placeholder="Search by email..."
+                    value={searchTerm}
+                    name="email-search"
+                    onChange={handleSearchChange}
+                    className="w-full sm:w-64"
+                  />
+                )}
+                <Dialog
+                  open={isAddMemberModalOpen}
+                  onOpenChange={setIsAddMemberModalOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="bg-[#7C3AED] hover:bg-[#7C3AED]/80 text-[#EFEFEF] px-6 py-2">
+                      Add New Member
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader className="flex flex-row items-center justify-between">
+                      <DialogTitle className="text-xl font-medium text-gray-700">
+                        Add Member
+                      </DialogTitle>
+                    </DialogHeader>
 
-                        <div className="space-y-2 flex flex-col gap-2">
-                          <div className="flex flex-row gap-2">
-                            <Input
-                              placeholder="Email"
-                              {...registerMember("email", { required: true })}
-                            />
-                            <Controller
-                              name="role"
-                              control={controlMember}
-                              render={({ field }) => (
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
-                                  <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Role" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {allroles?.roles?.map((role) => (
-                                      <SelectItem
-                                        key={role.value}
-                                        value={String(role?.value)}
-                                      >
-                                        {role.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                            />
-                            <Button
-                              onClick={addMember}
-                              className="bg-[#F3E8FF] hover:bg-[#F3E8FF]/80 text-black px-6 py-2"
+                    <div className="space-y-2 flex flex-col gap-2">
+                      <div className="flex flex-row gap-2">
+                        <Input
+                          placeholder="Email"
+                          {...registerMember("email", { required: true })}
+                        />
+                        <Controller
+                          name="role"
+                          control={controlMember}
+                          render={({ field }) => (
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
                             >
-                              Add
-                            </Button>
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {allroles?.roles?.map((role) => (
+                                  <SelectItem
+                                    key={role.value}
+                                    value={String(role?.value)}
+                                  >
+                                    {role.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                        <Button
+                          onClick={addMember}
+                          className="bg-[#F3E8FF] hover:bg-[#F3E8FF]/80 text-black px-6 py-2"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {addedMembers.map((member, index) => (
+                        <div
+                          key={index}
+                          className="border border-gray-200 rounded-lg px-1"
+                        >
+                          <div className="flex items-center">
+                            <div className="flex flex-1 items-center min-w-6 h-6 justify-center bg-[#F3E8FF] rounded-full size-6">
+                              {member.email.charAt(0)}
+                            </div>
+                            <div className="flex-2 truncate">
+                              {member.email}
+                            </div>
+                            <div className="flex flex-1 justify-end">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="ml-auto"
+                                onClick={() =>
+                                  setAddedMembers(
+                                    addedMembers.filter((_, i) => i !== index)
+                                  )
+                                }
+                              >
+                                <MdClose className="size-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {addedMembers.map((member, index) => (
-                            <div
-                              key={index}
-                              className="border border-gray-200 rounded-lg px-1"
-                            >
-                              <div className="flex items-center">
-                                <div className="flex flex-1 items-center min-w-6 h-6 justify-center bg-[#F3E8FF] rounded-full size-6">
-                                  {member.email.charAt(0)}
-                                </div>
-                                <div className="flex-2 truncate">
-                                  {member.email}
-                                </div>
-                                <div className="flex flex-1 justify-end">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="ml-auto"
-                                    onClick={() =>
-                                      setAddedMembers(
-                                        addedMembers.filter((_, i) => i !== index)
-                                      )
-                                    }
-                                  >
-                                    <MdClose className="size-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="space-y-2">
-                          <Button
-                            onClick={handleAddMemberSubmit}
-                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 mt-6"
-                          >
-                            Done
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
-
-                {usersData?.users?.docs && usersData?.users?.docs?.length > 0 ?
-                  <DataTable columns={columns}
-                    initialState={{
-                      columnVisibility: {
-                        _id: false,
-                      },
-                    }}
-                    data={usersData?.users.docs || []}
-                  /> :
-
-
-                  (<div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                    <div className="text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-200 rounded-lg mb-6">
-                        <Plus className="w-8 h-8 text-purple-600" strokeWidth={3} />
-                      </div>
-                      <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                        Add Member
-                      </h2>
-                      <p className="text-gray-500 text-base max-w-sm">
-                        Add member in your organization for Connectivity
-                      </p>
+                      ))}
                     </div>
-                  </div>)
+                    <div className="space-y-2">
+                      <Button
+                        onClick={handleAddMemberSubmit}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 mt-6"
+                      >
+                        Done
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
 
-                }
-
-              </CardContent>
-            </Card>
-          </div>
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogContent className="sm:max-w-md">
-              <form onSubmit={handleOrgSubmit(onOrgSubmit)}>
-                <DialogHeader>
-                  <DialogTitle className="text-xl font-semibold text-gray-900">
-                    Organization
-                  </DialogTitle>
-                </DialogHeader>
-
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="name"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Name
-                    </Label>
-                    <Input
-                      id="name"
-                      placeholder="Organization"
-                      className="w-full"
-                      {...registerOrg("name", { required: true })}
-                    />
+            {isLoading ? (
+              renderTableSkeleton()
+            ) : usersData?.users?.docs && usersData?.users?.docs?.length > 0 ? (
+              <DataTable
+                columns={columns}
+                initialState={{
+                  columnVisibility: {
+                    _id: false,
+                  },
+                }}
+                data={usersData?.users.docs || []}
+              />
+            ) : (
+              <div className="min-h-[400px] bg-gray-50 flex items-center justify-center p-4 rounded-md">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-lg mb-6">
+                    <Plus className="w-8 h-8 text-purple-600" strokeWidth={3} />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="locality"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Locality
-                    </Label>
-                    <Input
-                      id="locality"
-                      placeholder="Enter Locality"
-                      className="w-full"
-                      {...registerOrg("locality", { required: true })}
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-6"
-                  >
-                    Save
-                  </Button>
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                    Add Member
+                  </h2>
+                  <p className="text-gray-500 text-base max-w-sm">
+                    Add member in your organization for Connectivity
+                  </p>
                 </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
-    </>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleOrgSubmit(onOrgSubmit)}>
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                Organization
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="name"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="Organization"
+                  className="w-full"
+                  {...registerOrg("name", { required: true })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="locality"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Locality
+                </Label>
+                <Input
+                  id="locality"
+                  placeholder="Enter Locality"
+                  className="w-full"
+                  {...registerOrg("locality", { required: true })}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-6"
+              >
+                Save
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

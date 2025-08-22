@@ -10,9 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import AnalyticsCards from "@/components/dashboard/analyticsCards";
 import SimpleTable from "./simpleTable";
-import {  useGetApiV1SubmissionsSummary } from "@/api/formAPI";
+import { useGetApiV1SubmissionsSummary } from "@/api/formAPI";
 import { GetApiV1SubmissionsSummaryAccessibility as ApiAccessibility } from "@/api/model";
 import { useSearchParams } from "next/navigation";
 
@@ -49,7 +50,7 @@ export default function Dashboard() {
   const toDate = searchParams.get("toDate");
 
   // Pass debouncedSearchTerm as title, typeFilter as accessibility, and fromDate/toDate to the API
-  const { data: summeryOfForms } = useGetApiV1SubmissionsSummary({
+  const { data: summeryOfForms, isLoading } = useGetApiV1SubmissionsSummary({
     ...(debouncedSearchTerm ? { title: debouncedSearchTerm } : {}),
     ...(typeFilter && typeFilter !== "all" ? { accessibility: typeFilter } : {}),
     ...(fromDate ? { fromDate: fromDate } : {}),
@@ -102,8 +103,19 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Table */}
-              <SimpleTable filteredData={summeryOfForms?.summary || []} />
+              {/* Table or Skeleton */}
+              {isLoading ? (
+                <div className="space-y-2">
+                  {/* Table header skeleton */}
+                  <Skeleton className="h-10 w-full" />
+                  {/* Table rows skeletons */}
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Skeleton key={index} className="h-12 w-full" />
+                  ))}
+                </div>
+              ) : (
+                <SimpleTable filteredData={summeryOfForms?.summary || []} />
+              )}
             </CardContent>
           </Card>
         </div>
