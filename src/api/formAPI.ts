@@ -27,6 +27,7 @@ import type {
   DeleteFormImageResponse,
   DeleteUserResponse,
   Form,
+  FormActiveStatusResponse,
   FormRequest,
   FormResponse,
   FormSubmissionResponse,
@@ -64,6 +65,8 @@ import type {
   SubmissionResponse,
   SubmissionResponseCount,
   SubmissionsSummaryResponse,
+  UpdateFormResponseStatusRequest,
+  UpdateFormResponseStatusResponse,
   User,
   UserRolesResponse,
   UsersByOrgResponse,
@@ -4357,6 +4360,264 @@ export function useGetApiV1SubmissionsSubmissionResponseByFormId<
       formId,
       options,
     );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Enable or disable whether the form can receive responses.
+ * @summary Update form response receiving status
+ */
+export const putApiV1FormsFormIdIsReceiveResponse = (
+  formId: string,
+  updateFormResponseStatusRequest: UpdateFormResponseStatusRequest,
+) => {
+  return customInstance<UpdateFormResponseStatusResponse>({
+    url: `/api/v1/forms/${formId}/is-receive-response`,
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    data: updateFormResponseStatusRequest,
+  });
+};
+
+export const getPutApiV1FormsFormIdIsReceiveResponseMutationOptions = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1FormsFormIdIsReceiveResponse>>,
+    TError,
+    { formId: string; data: UpdateFormResponseStatusRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof putApiV1FormsFormIdIsReceiveResponse>>,
+  TError,
+  { formId: string; data: UpdateFormResponseStatusRequest },
+  TContext
+> => {
+  const mutationKey = ["putApiV1FormsFormIdIsReceiveResponse"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof putApiV1FormsFormIdIsReceiveResponse>>,
+    { formId: string; data: UpdateFormResponseStatusRequest }
+  > = (props) => {
+    const { formId, data } = props ?? {};
+
+    return putApiV1FormsFormIdIsReceiveResponse(formId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PutApiV1FormsFormIdIsReceiveResponseMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putApiV1FormsFormIdIsReceiveResponse>>
+>;
+export type PutApiV1FormsFormIdIsReceiveResponseMutationBody =
+  UpdateFormResponseStatusRequest;
+export type PutApiV1FormsFormIdIsReceiveResponseMutationError = ErrorType<
+  null | null | null
+>;
+
+/**
+ * @summary Update form response receiving status
+ */
+export const usePutApiV1FormsFormIdIsReceiveResponse = <
+  TError = ErrorType<null | null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof putApiV1FormsFormIdIsReceiveResponse>>,
+      TError,
+      { formId: string; data: UpdateFormResponseStatusRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof putApiV1FormsFormIdIsReceiveResponse>>,
+  TError,
+  { formId: string; data: UpdateFormResponseStatusRequest },
+  TContext
+> => {
+  const mutationOptions =
+    getPutApiV1FormsFormIdIsReceiveResponseMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Fetch whether the form is currently active (accepting responses) or not.
+ * @summary Get form active status
+ */
+export const getApiV1FormsFormIdActiveStatus = (
+  formId: string,
+  signal?: AbortSignal,
+) => {
+  return customInstance<FormActiveStatusResponse>({
+    url: `/api/v1/forms/${formId}/active-status`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetApiV1FormsFormIdActiveStatusQueryKey = (formId?: string) => {
+  return [`/api/v1/forms/${formId}/active-status`] as const;
+};
+
+export const getGetApiV1FormsFormIdActiveStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiV1FormsFormIdActiveStatusQueryKey(formId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>
+  > = ({ signal }) => getApiV1FormsFormIdActiveStatus(formId, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!formId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1FormsFormIdActiveStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>
+>;
+export type GetApiV1FormsFormIdActiveStatusQueryError = ErrorType<null | null>;
+
+export function useGetApiV1FormsFormIdActiveStatus<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsFormIdActiveStatus<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1FormsFormIdActiveStatus<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get form active status
+ */
+
+export function useGetApiV1FormsFormIdActiveStatus<
+  TData = Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1FormsFormIdActiveStatus>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1FormsFormIdActiveStatusQueryOptions(
+    formId,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

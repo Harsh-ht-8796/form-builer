@@ -9,7 +9,7 @@ import {
 } from "../ui/select";
 import { Fragment, useState } from "react";
 import { useParams } from "next/navigation";
-import { useGetApiV1FormsId, useGetApiV1SubmissionsFormFormIdFieldsQuestion } from "@/api/formAPI";
+import { useGetApiV1FormsFormIdActiveStatus, useGetApiV1SubmissionsFormFormIdFieldsQuestion } from "@/api/formAPI";
 import { Separator } from "../ui/separator";
 import { ScrollArea } from "../ui/scroll-area";
 
@@ -19,7 +19,7 @@ const tags = Array.from({ length: 50 }).map(
 export function QuestionView() {
 
   const { id } = useParams()
-  const { data: formData } = useGetApiV1FormsId(String(id))
+  const { data: formData } = useGetApiV1FormsFormIdActiveStatus(String(id))
   const [page, setPage] = useState(1)
 
 

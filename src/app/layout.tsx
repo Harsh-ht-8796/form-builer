@@ -32,7 +32,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               {children}
-              <Toaster />
+              <Toaster /> {/* 👈 add this once */}
             </ThemeProvider>
           </Providers>
         </NextAuthSessionProvider>

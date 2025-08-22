@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useGetApiV1FormsId } from "@/api/formAPI";
+import { useGetApiV1FormsFormIdActiveStatus, useGetApiV1FormsId } from "@/api/formAPI";
 import { FieldCard } from "./FieldCard";
 
 
@@ -8,7 +8,7 @@ import { FieldCard } from "./FieldCard";
 
 export function SummaryView() {
   const { id } = useParams();
-  const { data: formDetails } = useGetApiV1FormsId(String(id), {
+  const { data: formDetails } = useGetApiV1FormsFormIdActiveStatus(String(id), {
     query: {
       enabled: !!id,
     },

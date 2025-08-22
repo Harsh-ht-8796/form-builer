@@ -1,6 +1,6 @@
 import { Pagination } from "./pagination";
 import { DataTable } from "../forms-table";
-import { useGetApiV1FormsId, useGetApiV1SubmissionsFormIdIndividual } from "@/api/formAPI";
+import { useGetApiV1FormsFormIdActiveStatus, useGetApiV1SubmissionsFormIdIndividual } from "@/api/formAPI";
 import { useParams } from "next/navigation";
 import { FormField } from "@/api/model";
 import { useState } from "react";
@@ -27,7 +27,7 @@ const columns = [
 export function IndividualView() {
   const { id } = useParams()
   const [page, setPage] = useState(1)
-  const { data: formData } = useGetApiV1FormsId(String(id), {
+  const { data: formData } = useGetApiV1FormsFormIdActiveStatus(String(id), {
     query: {
       select(data) {
         type FormFieldMap = Record<string, FormField>; // key is field id, value is FormField

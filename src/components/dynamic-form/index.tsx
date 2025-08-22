@@ -37,7 +37,7 @@ type FormData = {
 export default function DynamicForm() {
 
   const { id } = useParams()
-  const { data: dynamicForm, isLoading } = useGetApiV1FormsIdUserView(String(id), {
+  const { data: dynamicForm, isLoading, isError, error } = useGetApiV1FormsIdUserView(String(id), {
     query: {
       enabled: !!id
     }
@@ -313,6 +313,10 @@ export default function DynamicForm() {
 
   if (isLoading) {
     return <div>Loading...</div>
+  }
+
+  if (isError) {
+    return <div>Form not found</div>
   }
   return (
     <div className="min-h-screen bg-white">

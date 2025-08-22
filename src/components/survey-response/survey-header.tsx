@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname, useParams } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import { MdOutlineGroup } from "react-icons/md";
-import { useGetApiV1SubmissionsSubmissionResponseByFormId } from "@/api/formAPI";
+import { getGetApiV1FormsFormIdActiveStatusQueryKey, useGetApiV1FormsFormIdActiveStatus, useGetApiV1SubmissionsSubmissionResponseByFormId, usePutApiV1FormsFormIdIsReceiveResponse } from "@/api/formAPI";
+import { useQueryClient } from "@tanstack/react-query";
 
 const VIEWS = {
   INDIVIDUAL: "Individual",
@@ -21,8 +22,13 @@ export function SurveyHeader() {
   const pathname = usePathname();
   const [activeView, setActiveView] = useState<string>("");
   const { id } = useParams()
-
-
+  const { mutateAsync: updateActiveStatus, isPending } = usePutApiV1FormsFormIdIsReceiveResponse()
+  const { data: formDetails } = useGetApiV1FormsFormIdActiveStatus(String(id), {
+    query: {
+      enabled: !!id
+    }
+  })
+  const queryClient = useQueryClient()
   useEffect(() => {
     const view = pathname.split("/");
     const lastView = view[view.length - 1];
@@ -36,10 +42,30 @@ export function SurveyHeader() {
       enabled: !!id
     }
   })
+
+
   const onViewChange = (view: string) => {
     setActiveView(view);
     router.push(`/sent/${id}/${view.toLowerCase()}`);
   };
+
+  const onSwitchChange = async (isActive: boolean) => {
+    console.log({ isActive })
+    await updateActiveStatus({
+      data: {
+        isActive
+      },
+      formId: String(id)
+    }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [...getGetApiV1FormsFormIdActiveStatusQueryKey(String(id))]
+        })
+      }
+    })
+  }
+
+
 
   return (
     <div className="flex items-center justify-between mb-6">
@@ -50,7 +76,7 @@ export function SurveyHeader() {
             <span className="text-lg font-extrabold text-[#464F56]">
               Responses
             </span>
-            <Switch id="airplane-mode" />
+            <Switch  onCheckedChange={onSwitchChange} checked={Boolean(formDetails?.isActive)} id="airplane-mode" />
           </div>
           <div className="flex items-center gap-2 text-gray-500">
             <span className="text-[#464F56] font-normal text-sm ">Peoples</span>

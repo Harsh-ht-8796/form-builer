@@ -1162,6 +1162,57 @@
             "example": 7
           }
         }
+      },
+      "UpdateFormResponseStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "formId": {
+            "type": "string",
+            "example": "68a81c2b61a01a25265cff7a"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "UpdateFormResponseStatusRequest": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the form should accept responses",
+            "example": true
+          }
+        },
+        "required": [
+          "isActive"
+        ]
+      },
+      "FormActiveStatusResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique form ID",
+            "example": "68a81c2b61a01a25265cff7a"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the form is currently active",
+            "example": false
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormField"
+            }
+          }
+        }
       }
     }
   },
@@ -2813,6 +2864,109 @@
                 },
                 "example": {
                   "count": 7
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Form not found"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/{formId}/is-receive-response": {
+      "put": {
+        "summary": "Update form response receiving status",
+        "description": "Enable or disable whether the form can receive responses.",
+        "tags": [
+          "Forms"
+        ],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the form to update",
+            "schema": {
+              "type": "string",
+              "example": "68a81c2b61a01a25265cff7a"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFormResponseStatusRequest"
+              },
+              "example": {
+                "isActive": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Form response receiving status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateFormResponseStatusResponse"
+                },
+                "example": {
+                  "success": true,
+                  "formId": "68a81c2b61a01a25265cff7a",
+                  "isActive": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Form not found"
+          }
+        }
+      }
+    },
+    "/api/v1/forms/{formId}/active-status": {
+      "get": {
+        "summary": "Get form active status",
+        "description": "Fetch whether the form is currently active (accepting responses) or not.",
+        "tags": [
+          "Forms"
+        ],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the form",
+            "schema": {
+              "type": "string",
+              "example": "68a81c2b61a01a25265cff7a"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Form active status fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormActiveStatusResponse"
+                },
+                "example": {
+                  "_id": "68a81c2b61a01a25265cff7a",
+                  "isActive": false
                 }
               }
             }

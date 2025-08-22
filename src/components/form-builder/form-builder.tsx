@@ -271,6 +271,7 @@ interface FormInputs {
   formDescription: string;
   coverImageUrl?: string | null;
   logoImageUrl?: string | null;
+  error?: any | null
 }
 
 interface HeaderProps {
@@ -575,6 +576,7 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
           questions: [],
           coverImageUrl: null,
           logoImageUrl: null,
+          error: e
         };
       }
     },
@@ -598,7 +600,8 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
   const formDescription = watch("formDescription");
   const coverImageUrl = watch("coverImageUrl");
   const logoImageUrl = watch("logoImageUrl");
-
+  const error = watch("error");
+  console.log(error?.response?.data)
   const uploadFile = async (file: File, type: uploadFileType) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -689,6 +692,9 @@ export default function DashboardFormBuilder({ children }: { children?: React.Re
     return <div>Loading...</div>
   }
 
+  if (error?.response?.data) {
+    return <div>{error?.response?.data?.message}</div>
+  }
   return (
     <SidebarProvider>
       <AppSidebar />
