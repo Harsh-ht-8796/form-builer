@@ -277,18 +277,6 @@ export default function SentFormsPage() {
         const status = row.getValue("status");
         return (
           <div className="flex items-center justify-end">
-            {status === "published" && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  router.push(`/form-builder/${row.getValue("_id")}`);
-                }}
-                size="sm"
-                className="h-8 w-8 p-0"
-              >
-                <Pencil className="h-4 w-4 text-gray-500" />
-              </Button>
-            )}
             <Button
               variant="ghost"
               onClick={() => handleDelete(row.getValue("_id"))}

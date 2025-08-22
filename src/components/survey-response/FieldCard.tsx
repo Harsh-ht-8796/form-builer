@@ -2,11 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, CartesianGrid, XAxis, YAxis, Bar } from "recharts"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Fragment } from "react"
 import { Separator } from "@/components/ui/separator"
 import { useGetApiV1SubmissionsFormFormIdFieldFieldIdAnswers } from "@/api/formAPI"
+import { FormFieldType } from "@/api/model"
 
 // Define interfaces for data types
 interface PieChartData {
@@ -18,6 +19,7 @@ interface PieChartData {
 interface VerticalBarData {
     option: string
     value: number
+    fill: string
 }
 
 interface HorizontalBarData {
@@ -34,6 +36,23 @@ interface CardConfig {
     data: PieChartData[] | VerticalBarData[] | HorizontalBarData[] | string[]
 }
 
+
+const CustomTooltipContent = ({ active, payload, label }: any) => {
+    console.log("[v0] Tooltip data:", { active, payload, label })
+
+    if (active && payload && payload.length) {
+        const data = payload[0]
+        return (
+            <div className="bg-white p-2 border border-gray-200 rounded shadow-sm">
+                <p className="text-sm font-medium">{label || data.payload?.name || data.payload?.option}</p>
+                <p className="text-sm text-purple-600">
+                    {data.name === "Responses" ? `${data.value} responses` : `${data.value}${data.payload?.name ? "%" : "%"}`}
+                </p>
+            </div>
+        )
+    }
+    return null
+}
 // Colors matching the original PieChart component
 const COLORS = ["#6B46C1", "#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD"]
 
@@ -46,22 +65,50 @@ const chartConfig = {
 
 // Map field types to card config and data
 const mapFieldToCardConfig = (field: any, responseData: any): CardConfig => {
-    console.log({ type: field.type })
-    switch (field.type) {
-        case "long-text":
-        case "short-text":
+    let text = "short-answer"
+    if (field.type === FormFieldType["long-text"]) {
+        text = "long-answer"
+    }
+    switch (field.type as FormFieldType) {
+        case FormFieldType["long-text"]:
+        case FormFieldType["short-text"]:
             return {
                 id: field.id,
-                type: "short-answer",
+                type: text,
                 title: field.title,
                 description: "Breakdown by department percentage",
                 responses: responseData?.length || 0,
                 data: responseData?.text_arr || [],
             }
-        case "multiple-choice":
+        case FormFieldType["multiple-choice"]:
             return {
                 id: field.id,
                 type: "pie",
+                title: field.title,
+                description: "Breakdown by department percentage",
+                responses: responseData?.mcq_arry?.length || 0,
+                data:
+                    responseData?.mcq_arry ||
+                    field.options.map((option: string, index: number) => ({
+                        name: option,
+                        value: 0,
+                        fill: COLORS[index % COLORS.length],
+                    })),
+            }
+        case FormFieldType.checkbox:
+            console.log({ mcq_arry: responseData?.mcq_arry })
+            return {
+                id: field.id,
+                type: "vertical-bar",
+                title: field.title,
+                description: "Breakdown by department percentage",
+                responses: responseData?.mcq_arry?.length,
+                data: responseData?.mcq_arry,
+            }
+        case FormFieldType.dropdown:
+            return {
+                id: field.id,
+                type: "horizontal-bar",
                 title: field.title,
                 description: "Breakdown by department percentage",
                 responses: responseData?.mcq_arry?.length || 0,
@@ -84,7 +131,6 @@ const mapFieldToCardConfig = (field: any, responseData: any): CardConfig => {
             }
     }
 }
-
 const RADIAN = Math.PI / 180
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }: any) => {
     // Only show labels for slices with significant percentage
@@ -108,7 +154,10 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
     )
 }
 
+
 const renderChart = (card: CardConfig) => {
+
+
     switch (card.type) {
         case "pie":
             return (
@@ -154,11 +203,11 @@ const renderChart = (card: CardConfig) => {
                     </ChartContainer>
                 </div>
             )
-        case "long-anser":
+        case "long-answer":
         case "short-answer":
             return (
                 <div className="flex flex-col">
-                    <h1 className="text-base text-[#464F56] font-medium py-2">Short answer</h1>
+                    <h1 className="text-base text-[#464F56] font-medium py-2">{card.type==="short-answer" ? "Short Answer" :"Long Answer"}</h1>
                     <ScrollArea className="h-[350px] py-1 rounded-md border">
                         <div className="p-3 space-y-3">
                             {(card.data as string[]).map((response, index) => (
@@ -169,6 +218,59 @@ const renderChart = (card: CardConfig) => {
                             ))}
                         </div>
                     </ScrollArea>
+                </div>
+            )
+        case "vertical-bar":
+            return (
+                <div className="w-full">
+                    <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={card.data as VerticalBarData[]} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                                <YAxis />
+                                <ChartTooltip content={<CustomTooltipContent />} />
+                                <Bar dataKey="value" fill="#6B46C1" radius={[4, 4, 0, 0]}>
+                                    {(card.data as VerticalBarData[]).map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                </div>
+            )
+        case "horizontal-bar":
+            return (
+                <div className="w-full">
+                    <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                        <ResponsiveContainer
+                            width={"100%"}
+                            height={"100%"}
+                        >
+                            <BarChart
+                                layout="vertical"
+                                data={card.data as VerticalBarData[]}
+                                margin={{
+                                    top: 20,
+                                    right: 20,
+                                    bottom: 20,
+                                    left: 20,
+                                }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <ChartTooltip content={<CustomTooltipContent />} />
+                                <XAxis type="number" />
+                                <YAxis dataKey="name" type="category" />
+                                <Bar dataKey="value" fill="#6B46C1" radius={[4, 4, 0, 0]}>
+                                    {(card.data as VerticalBarData[]).map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+
+                    </ChartContainer>
                 </div>
             )
         default:
