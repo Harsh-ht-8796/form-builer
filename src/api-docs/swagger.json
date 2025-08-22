@@ -1152,6 +1152,16 @@
         "required": [
           "image"
         ]
+      },
+      "SubmissionResponseCount": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "Total number of submission responses for the form",
+            "example": 7
+          }
+        }
       }
     }
   },
@@ -2770,6 +2780,48 @@
           },
           "404": {
             "description": "Form or image not found"
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/submission-response-by/{formId}": {
+      "get": {
+        "summary": "Get submission response count by formId",
+        "description": "Returns the total number of responses submitted for a given form.",
+        "tags": [
+          "Submissions"
+        ],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the form",
+            "schema": {
+              "type": "string",
+              "example": "68a81c2b61a01a25265cff7a"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Count of submission responses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponseCount"
+                },
+                "example": {
+                  "count": 7
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Form not found"
           }
         }
       }

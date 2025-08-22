@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname, useParams } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import { MdOutlineGroup } from "react-icons/md";
+import { useGetApiV1SubmissionsSubmissionResponseByFormId } from "@/api/formAPI";
 
 const VIEWS = {
   INDIVIDUAL: "Individual",
@@ -19,6 +20,8 @@ export function SurveyHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const [activeView, setActiveView] = useState<string>("");
+  const { id } = useParams()
+
 
   useEffect(() => {
     const view = pathname.split("/");
@@ -28,12 +31,16 @@ export function SurveyHeader() {
     setActiveView(firstChar + remainingChars);
   }, []);
 
-  const { id } = useParams()
+  const { data: submissionResponse } = useGetApiV1SubmissionsSubmissionResponseByFormId(String(id), {
+    query: {
+      enabled: !!id
+    }
+  })
   const onViewChange = (view: string) => {
     setActiveView(view);
-
     router.push(`/sent/${id}/${view.toLowerCase()}`);
   };
+
   return (
     <div className="flex items-center justify-between mb-6">
       <div className="flex items-center gap-6">
@@ -52,7 +59,7 @@ export function SurveyHeader() {
               variant="outline"
               className="text-gray-600 !px-0 text-md border-none hover:bg-gray-100"
             >
-              34
+              {submissionResponse?.count || 0}
             </Badge>
           </div>
         </div>

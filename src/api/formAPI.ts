@@ -62,6 +62,7 @@ import type {
   RegisterRequest,
   RegisterResponse,
   SubmissionResponse,
+  SubmissionResponseCount,
   SubmissionsSummaryResponse,
   User,
   UserRolesResponse,
@@ -4163,3 +4164,206 @@ export const useDeleteApiV1FormsFormIdImage = <
 
   return useMutation(mutationOptions, queryClient);
 };
+
+/**
+ * Returns the total number of responses submitted for a given form.
+ * @summary Get submission response count by formId
+ */
+export const getApiV1SubmissionsSubmissionResponseByFormId = (
+  formId: string,
+  signal?: AbortSignal,
+) => {
+  return customInstance<SubmissionResponseCount>({
+    url: `/api/v1/submissions/submission-response-by/${formId}`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetApiV1SubmissionsSubmissionResponseByFormIdQueryKey = (
+  formId?: string,
+) => {
+  return [`/api/v1/submissions/submission-response-by/${formId}`] as const;
+};
+
+export const getGetApiV1SubmissionsSubmissionResponseByFormIdQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+  >,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiV1SubmissionsSubmissionResponseByFormIdQueryKey(formId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>>
+  > = ({ signal }) =>
+    getApiV1SubmissionsSubmissionResponseByFormId(formId, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!formId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1SubmissionsSubmissionResponseByFormIdQueryResult =
+  NonNullable<
+    Awaited<ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>>
+  >;
+export type GetApiV1SubmissionsSubmissionResponseByFormIdQueryError = ErrorType<
+  null | null
+>;
+
+export function useGetApiV1SubmissionsSubmissionResponseByFormId<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+  >,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsSubmissionResponseByFormId<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+  >,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1SubmissionsSubmissionResponseByFormId<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+  >,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get submission response count by formId
+ */
+
+export function useGetApiV1SubmissionsSubmissionResponseByFormId<
+  TData = Awaited<
+    ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+  >,
+  TError = ErrorType<null | null>,
+>(
+  formId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiV1SubmissionsSubmissionResponseByFormId>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiV1SubmissionsSubmissionResponseByFormIdQueryOptions(
+      formId,
+      options,
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
