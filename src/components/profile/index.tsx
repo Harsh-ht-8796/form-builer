@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,7 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton"; // Shadcn UI Skeleton
 import {
   useGetApiV1UsersMe,
   useGetApiV1OrganizationsMe,
@@ -114,7 +116,6 @@ export default function ProfileComponent() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      // Update organization details
       await updateOrgDetails(
         {
           data: {
@@ -133,7 +134,6 @@ export default function ProfileComponent() {
         }
       );
 
-      // Update user details
       await updateUserDetails(
         {
           data: {
@@ -159,7 +159,7 @@ export default function ProfileComponent() {
   const onPasswordSubmit = async (data: PasswordFormData) => {
     try {
       if (data.newPassword !== data.confirmPassword) {
-        return; // Validation is handled by react-hook-form
+        return;
       }
 
       await updatePassword(
@@ -189,17 +189,20 @@ export default function ProfileComponent() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const response = await uploadImages({
-        data: {
-          profileImage: file,
+      const response = await uploadImages(
+        {
+          data: {
+            profileImage: file,
+          },
         },
-      }, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: getGetApiV1UsersMeQueryKey(),
-          });
-        },
-      });
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({
+              queryKey: getGetApiV1UsersMeQueryKey(),
+            });
+          },
+        }
+      );
 
       const profileUrl = response.profileUrlUrl
         ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${response.profileUrlUrl}`
@@ -210,14 +213,6 @@ export default function ProfileComponent() {
       console.error("Error uploading file:", error);
     }
   };
-
-  if (isUserLoading || isOrgLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!userData || !orgData) {
-    return <div>Error: Unable to load profile data</div>;
-  }
 
   const profileUrl = userWatch("profileUrl");
 
@@ -231,6 +226,53 @@ export default function ProfileComponent() {
       },
     });
   };
+
+  // Skeleton for the profile form and avatar
+  const renderSkeleton = () => (
+    <div className="p-6 min-h-screen rounded-lg bg-white">
+      <Skeleton className="h-8 w-48 mb-8" />
+      <div className="grid grid-cols-2 gap-8">
+        <div className="col-span-1 flex justify-center items-center">
+          <div className="space-y-4">
+            <div className="border-2 border-dashed p-4">
+              <div className="flex justify-end items-center gap-2">
+                <Skeleton className="h-8 w-8 rounded-md" />
+                <Skeleton className="h-8 w-8 rounded-md" />
+              </div>
+              <Skeleton className="w-48 h-48 rounded-full" />
+            </div>
+            <div className="flex justify-center">
+              <Skeleton className="h-10 w-40 rounded-md" />
+            </div>
+          </div>
+        </div>
+        <div className="col-span-1 space-y-4 max-w-sm">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full rounded-md" />
+            </div>
+          ))}
+          <div className="flex gap-2 pt-5">
+            <Skeleton className="h-10 w-32 rounded-md" />
+            <Skeleton className="h-10 w-32 rounded-md" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isUserLoading || isOrgLoading) {
+    return renderSkeleton();
+  }
+
+  if (!userData || !orgData) {
+    return (
+      <div className="p-6 min-h-screen rounded-lg bg-white">
+        Error: Unable to load profile data
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 min-h-screen rounded-lg bg-white">
@@ -333,7 +375,8 @@ export default function ProfileComponent() {
                             },
                             pattern: {
                               value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-                              message: "Password must contain at least one letter, one number, and one special character",
+                              message:
+                                "Password must contain at least one letter, one number, and one special character",
                             },
                           })}
                           className="w-full"
@@ -359,8 +402,7 @@ export default function ProfileComponent() {
                           {...registerPassword("confirmPassword", {
                             required: "Please confirm your new password",
                             validate: (value) =>
-                              value === watch("newPassword") ||
-                              "Passwords do not match",
+                              value === watch("newPassword") || "Passwords do not match",
                           })}
                           className="w-full"
                         />
@@ -466,16 +508,18 @@ export default function ProfileComponent() {
               <Button
                 type="button"
                 className="bg-purple-600 hover:bg-purple-700 text-white"
-                onClick={() => resetProfile({
-                  username: userData?.username || "",
-                  email: userData?.email || "",
-                  profileUrl: userData?.profileImage
-                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileImage}`
-                    : "",
-                  role: userData?.roles?.[0] || "super_admin",
-                  organization: orgData?.name || "",
-                  locality: orgData?.locality || "",
-                })}
+                onClick={() =>
+                  resetProfile({
+                    username: userData?.username || "",
+                    email: userData?.email || "",
+                    profileUrl: userData?.profileImage
+                      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}${userData?.profileImage}`
+                      : "",
+                    role: userData?.roles?.[0] || "super_admin",
+                    organization: orgData?.name || "",
+                    locality: orgData?.locality || "",
+                  })
+                }
               >
                 Cancel
               </Button>
