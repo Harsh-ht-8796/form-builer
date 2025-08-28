@@ -11,8 +11,8 @@ import type React from "react"
 // import { toast } from "sonner"
 // import Link from "next/link"
 // import { useRouter } from "next/navigation"
-import EmailVerification from "@/components/forgot-password"
 import ResetPasswordComponent from "@/components/reset-password"
+import { Suspense } from "react"
 
 export default function EmailVerificationPage() {
   // const [email, setEmail] = useState("")
@@ -37,6 +37,8 @@ export default function EmailVerificationPage() {
   // }
 
   return (
-    <ResetPasswordComponent/>
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordComponent />
+    </Suspense>
   )
 }
