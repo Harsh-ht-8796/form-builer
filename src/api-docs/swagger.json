@@ -391,6 +391,10 @@
             "type": "boolean",
             "example": false
           },
+          "isInitialPasswordUpdated": {
+            "type": "boolean",
+            "example": true
+          },
           "roles": {
             "type": "array",
             "items": {
@@ -1211,6 +1215,56 @@
             "items": {
               "$ref": "#/components/schemas/FormField"
             }
+          }
+        }
+      },
+      "VerifyOtpResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token returned after OTP verification",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "SetPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Password set successfully"
+          }
+        }
+      },
+      "SetPasswordRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "newPassword",
+          "otp",
+          "accessToken"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "harshadtibile@gmail.com"
+          },
+          "newPassword": {
+            "type": "string",
+            "format": "password",
+            "example": "Harsh@8796"
+          },
+          "otp": {
+            "type": "string",
+            "description": "One-time password used for verification",
+            "example": "bq)bQNb%jvpp"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Access token returned from OTP verification",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
           }
         }
       }
@@ -2976,6 +3030,105 @@
           },
           "404": {
             "description": "Form not found"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/verify-otp": {
+      "get": {
+        "summary": "Verify OTP",
+        "description": "Verify an OTP sent to a user's email. Returns an access token if the OTP is valid.",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "description": "User email address",
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "example": "harshadtibile@gmail.com"
+            }
+          },
+          {
+            "name": "otp",
+            "in": "query",
+            "required": true,
+            "description": "One-time password sent to the user's email",
+            "schema": {
+              "type": "string",
+              "example": "NMrH5sVD4hqy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyOtpResponse"
+                },
+                "example": {
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid OTP or missing parameters"
+          },
+          "401": {
+            "description": "OTP expired or incorrect"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/set-password": {
+      "post": {
+        "summary": "Set Password After OTP Verification",
+        "description": "Allows a user to set a new password after verifying OTP. Requires email, OTP, and access token from OTP verification.",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPasswordRequest"
+              },
+              "example": {
+                "email": "harshadtibile@gmail.com",
+                "newPassword": "Harsh@8796",
+                "otp": "bq)bQNb%jvpp",
+                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password set successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetPasswordResponse"
+                },
+                "example": {
+                  "message": "Password set successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., OTP mismatch, missing fields)"
+          },
+          "401": {
+            "description": "Unauthorized or expired access token"
           }
         }
       }

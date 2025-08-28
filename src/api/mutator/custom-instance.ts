@@ -1,5 +1,5 @@
 import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { getSession } from 'next-auth/react';
+import { getSession, signOut ,} from 'next-auth/react';
 
 // Create instance
 export const AXIOS_INSTANCE = Axios.create({
@@ -18,6 +18,12 @@ AXIOS_INSTANCE.interceptors.request.use(
     return config;
   },
   (error: AxiosError) => {
+    console.log(error.status)
+    if (error.status === 401) {
+      window.location.href = '/auth/login';
+      // Handle unauthorized error, e.g., redirect to login
+      console.log("Unauthorized! Redirect to login.");
+    }
     console.error('[Request Error]', error);
     return Promise.reject(error);
   },
@@ -28,8 +34,12 @@ AXIOS_INSTANCE.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: AxiosError) => {
-    console.error('[Response Error]', error);
+  async (error: AxiosError) => {
+    console.error('[Response Errorr]', error);
+    if (error.response?.status === 401) {
+      console.log("Unauthorized! Redirect to login.");
+      await signOut({ callbackUrl: "/auth/login" });
+    }
     // Optionally transform or handle error globally
     return Promise.reject(error);
   },
@@ -37,7 +47,7 @@ AXIOS_INSTANCE.interceptors.response.use(
 
 export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
   const source = Axios.CancelToken.source();
-  
+
   const promise = AXIOS_INSTANCE({ ...config, cancelToken: source.token }).then(
     ({ data }) => data,
   );
@@ -52,4 +62,4 @@ export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
 
 export default customInstance;
 
-export interface ErrorType<Error> extends AxiosError<Error> {}
+export interface ErrorType<Error> extends AxiosError<Error> { }

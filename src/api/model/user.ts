@@ -14,6 +14,7 @@ export interface User {
   profileImage?: string;
   orgId?: string;
   isEmailVerified?: boolean;
+  isInitialPasswordUpdated?: boolean;
   roles?: string[];
   __v?: number;
   createdAt?: string;

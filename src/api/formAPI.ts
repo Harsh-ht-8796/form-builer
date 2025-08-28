@@ -31,6 +31,7 @@ import type {
   FormRequest,
   FormResponse,
   FormSubmissionResponse,
+  GetApiV1AuthVerifyOtpParams,
   GetApiV1FormsFormIdVisibility200,
   GetApiV1FormsReceivedParams,
   GetApiV1FormsSearch200,
@@ -62,6 +63,8 @@ import type {
   ReceivedFormsResponse,
   RegisterRequest,
   RegisterResponse,
+  SetPasswordRequest,
+  SetPasswordResponse,
   SubmissionResponse,
   SubmissionResponseCount,
   SubmissionsSummaryResponse,
@@ -70,6 +73,7 @@ import type {
   User,
   UserRolesResponse,
   UsersByOrgResponse,
+  VerifyOtpResponse,
 } from "./model";
 
 import { customInstance } from "./mutator/custom-instance";
@@ -4628,3 +4632,252 @@ export function useGetApiV1FormsFormIdActiveStatus<
 
   return query;
 }
+
+/**
+ * Verify an OTP sent to a user's email. Returns an access token if the OTP is valid.
+ * @summary Verify OTP
+ */
+export const getApiV1AuthVerifyOtp = (
+  params: GetApiV1AuthVerifyOtpParams,
+  signal?: AbortSignal,
+) => {
+  return customInstance<VerifyOtpResponse>({
+    url: `/api/v1/auth/verify-otp`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getGetApiV1AuthVerifyOtpQueryKey = (
+  params?: GetApiV1AuthVerifyOtpParams,
+) => {
+  return [`/api/v1/auth/verify-otp`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetApiV1AuthVerifyOtpQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+  TError = ErrorType<null | null>,
+>(
+  params: GetApiV1AuthVerifyOtpParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1AuthVerifyOtpQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>
+  > = ({ signal }) => getApiV1AuthVerifyOtp(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiV1AuthVerifyOtpQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>
+>;
+export type GetApiV1AuthVerifyOtpQueryError = ErrorType<null | null>;
+
+export function useGetApiV1AuthVerifyOtp<
+  TData = Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+  TError = ErrorType<null | null>,
+>(
+  params: GetApiV1AuthVerifyOtpParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1AuthVerifyOtp<
+  TData = Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+  TError = ErrorType<null | null>,
+>(
+  params: GetApiV1AuthVerifyOtpParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiV1AuthVerifyOtp<
+  TData = Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+  TError = ErrorType<null | null>,
+>(
+  params: GetApiV1AuthVerifyOtpParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Verify OTP
+ */
+
+export function useGetApiV1AuthVerifyOtp<
+  TData = Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+  TError = ErrorType<null | null>,
+>(
+  params: GetApiV1AuthVerifyOtpParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1AuthVerifyOtp>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiV1AuthVerifyOtpQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Allows a user to set a new password after verifying OTP. Requires email, OTP, and access token from OTP verification.
+ * @summary Set Password After OTP Verification
+ */
+export const postApiV1AuthSetPassword = (
+  setPasswordRequest: SetPasswordRequest,
+  signal?: AbortSignal,
+) => {
+  return customInstance<SetPasswordResponse>({
+    url: `/api/v1/auth/set-password`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: setPasswordRequest,
+    signal,
+  });
+};
+
+export const getPostApiV1AuthSetPasswordMutationOptions = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1AuthSetPassword>>,
+    TError,
+    { data: SetPasswordRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1AuthSetPassword>>,
+  TError,
+  { data: SetPasswordRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiV1AuthSetPassword"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1AuthSetPassword>>,
+    { data: SetPasswordRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1AuthSetPassword(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1AuthSetPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1AuthSetPassword>>
+>;
+export type PostApiV1AuthSetPasswordMutationBody = SetPasswordRequest;
+export type PostApiV1AuthSetPasswordMutationError = ErrorType<null | null>;
+
+/**
+ * @summary Set Password After OTP Verification
+ */
+export const usePostApiV1AuthSetPassword = <
+  TError = ErrorType<null | null>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiV1AuthSetPassword>>,
+      TError,
+      { data: SetPasswordRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1AuthSetPassword>>,
+  TError,
+  { data: SetPasswordRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1AuthSetPasswordMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};

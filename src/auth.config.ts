@@ -15,14 +15,15 @@ declare module "next-auth" {
             name?: string;
             username?: string;
             isEmailVerified: boolean;
+            isInitialPasswordUpdated: boolean;
             roles: string[];
             profileImage: string;
             orgId: string;
             accessToken: string;
             refreshToken: string;
-            accessTokenExpires?: number; // Made optional
+            accessTokenExpires?: number;
         };
-        error?: string; // Added error property
+        error?: string;
     }
 
     interface User {
@@ -30,12 +31,13 @@ declare module "next-auth" {
         email: string;
         username: string;
         isEmailVerified: boolean;
+        isInitialPasswordUpdated: boolean;
         roles: string[];
         profileImage: string;
         orgId: string;
         accessToken: string;
         refreshToken: string;
-        accessTokenExpires?: number; // Made optional
+        accessTokenExpires?: number;
     }
 }
 
@@ -45,12 +47,13 @@ declare module "next-auth/jwt" {
         email: string;
         username: string;
         isEmailVerified: boolean;
+        isInitialPasswordUpdated: boolean;
         profileImage: string;
         roles: string[];
         orgId: string;
         accessToken: string;
         refreshToken: string;
-        accessTokenExpires?: number; // Made optional
+        accessTokenExpires?: number;
         error?: string;
     }
 }
@@ -184,17 +187,19 @@ export default {
                         email: String(user?.email),
                         username: String(user?.username),
                         isEmailVerified: Boolean(user?.isEmailVerified),
+                        isInitialPasswordUpdated: Boolean(user?.isInitialPasswordUpdated),
                         roles: Array.isArray(user?.roles) ? user.roles : [],
                         orgId: String(user?.orgId),
                         profileImage: String(user?.profileImage),
                         accessToken: String(tokens?.access?.token),
                         refreshToken: String(tokens?.refresh?.token),
-                        accessTokenExpires: tokens?.access?.expires // Optional in return type
+                        accessTokenExpires: tokens?.access?.expires
                     };
-                } catch (error) {
+                } catch (error: any) {
                     if (error instanceof ZodError) {
                         return null;
                     }
+                    console.error("Authorization error:", error.message);
                     return null;
                 }
             },
@@ -228,17 +233,19 @@ export default {
                         email: String(user?.email),
                         username: String(user?.username),
                         isEmailVerified: Boolean(user?.isEmailVerified),
+                        isInitialPasswordUpdated: Boolean(user?.isInitialPasswordUpdated),
                         roles: Array.isArray(user?.roles) ? user.roles : [],
                         orgId: String(user?.orgId),
                         profileImage: String(user?.profileImage),
                         accessToken: String(tokens?.access?.token),
                         refreshToken: String(tokens?.refresh?.token),
-                        accessTokenExpires: tokens?.access?.expires // Optional in return type
+                        accessTokenExpires: tokens?.access?.expires
                     };
-                } catch (error) {
+                } catch (error: any) {
                     if (error instanceof ZodError) {
                         return null;
                     }
+                    console.error("Authorization error:", error.message);
                     return null;
                 }
             },
@@ -260,6 +267,7 @@ export default {
                 token.email = user.email;
                 token.username = user.username;
                 token.isEmailVerified = user.isEmailVerified;
+                token.isInitialPasswordUpdated = user.isInitialPasswordUpdated;
                 token.roles = user.roles;
                 token.orgId = user.orgId;
                 token.profileImage = user.profileImage;
@@ -281,6 +289,14 @@ export default {
                 ? Promise.resolve(url)
                 : Promise.resolve(baseUrl);
         },
+        async signIn({ credentials, user, account }) {
+            console.log({ credentials, user, account })
+            if (user?.isInitialPasswordUpdated === false) {
+                 throw new Error("Initial password must be updated before signing in.");
+            }
+            return true
+
+        },
         authorized({ auth }) {
             const isAuthenticated = !!auth?.user;
             return isAuthenticated;
@@ -291,6 +307,7 @@ export default {
                 session.user.email = token.email;
                 session.user.username = token.username;
                 session.user.isEmailVerified = token.isEmailVerified;
+                session.user.isInitialPasswordUpdated = token.isInitialPasswordUpdated;
                 session.user.profileImage = token.profileImage;
                 session.user.roles = token.roles;
                 session.user.orgId = token.orgId;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { signIn } from "next-auth/react";
+import { signIn, } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -21,7 +21,6 @@ export default function LoginPage() {
 
   const router = useRouter();
   const searchParams = useSearchParams(); // Access query parameters
-
   const [error, setError] = useState<string | null>(null);
   const onSubmit = async (data: any) => {
     const result = await signIn("credentials", {
@@ -30,6 +29,7 @@ export default function LoginPage() {
       redirect: false,
     });
 
+    console.log({ result });
     if (!result?.error) {
       // Check for formId in query parameters
       const formId = searchParams.get("formId");
@@ -39,10 +39,10 @@ export default function LoginPage() {
         router.replace("/dashboard"); // Fallback to /dashboard
       }
     }
+    console.log({ result });
 
     setError(String(result?.error));
   };
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Column */}
@@ -68,9 +68,16 @@ export default function LoginPage() {
           {/* Display error message if error=CredentialsSignin */}
           {error === "CredentialsSignin" && (
             <div className="text-red-600 text-sm text-center">
-              Invalid email or password. Please try again.
+              {"Invalid email or password. Please try again."}
             </div>
           )}
+          {
+            error === "AccessDenied" && (
+              <div className="text-red-600 text-sm text-center">
+                {"Access Denied. Please update your initial password."}
+              </div>
+            )
+          }
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">

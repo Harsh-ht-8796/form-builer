@@ -43,7 +43,14 @@ export default function DashboardLayout({
     router.replace("/auth/login");
   };
   const { data: session, status } = useSession();
+  // console.log({ session })
+  // useEffect(() => {
+  //   if (session?.user?.isInitialPasswordUpdated === false) {
+  //     console.log({ session:"sss" });
 
+  //     router.replace("/auth/opt-password-update");
+  //   }
+  // }, [status, router]); 
 
   return (
     <SidebarProvider>

@@ -7,8 +7,6 @@ const { auth } = NextAuth(authConfig);
 // API base URL (use environment variable in production)
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL + '/api/v1';
 
-console.log({ API_BASE_URL })
-
 // Optional: Server-side Bearer token (if not using user token)
 const API_TOKEN = process.env.FORM_API_TOKEN; // Set in .env
 
@@ -16,8 +14,6 @@ export default auth(async (req) => {
     const { nextUrl } = req;
     const isAuthenticated = !!req.auth;
     const pathname = nextUrl.pathname;
-    console.log({ pathname });
-
     // Check if the route is a form route (e.g., /form/:id)
     const isFormRoute = pathname.match(/^\/form\/[a-zA-Z0-9]+$/);
 
@@ -26,7 +22,7 @@ export default auth(async (req) => {
         try {
             // Use the user's token from NextAuth session, or fallback to server-side token
             const token = req.auth?.user.accessToken || API_TOKEN;
-            console.log({ API_BASE_URL: `${API_BASE_URL}/forms/${formId}/user-view` })
+            console.log({ API_BASE_URL: `${API_BASE_URL}/forms/${formId}/user-view` });
             // Call the endpoint to check form visibility
             const response = await fetch(`${API_BASE_URL}/forms/${formId}/user-view`, {
                 method: 'GET',
@@ -79,10 +75,19 @@ export default auth(async (req) => {
 
     // Existing logic for other routes
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+
+    // Redirect authenticated users on public routes to DEFAULT_REDIRECT
     if (isPublicRoute && isAuthenticated) {
         return Response.redirect(new URL(DEFAULT_REDIRECT, nextUrl));
     }
 
+    // Allow non-authenticated users to access public routes
+    if (isPublicRoute && !isAuthenticated) {
+        console.log('Accessing public route without authentication');
+        return; // Proceed to the current public route
+    }
+
+    // Redirect non-authenticated users on non-public routes to ROOT
     if (!isAuthenticated && !isPublicRoute) {
         return Response.redirect(new URL(ROOT, nextUrl));
     }

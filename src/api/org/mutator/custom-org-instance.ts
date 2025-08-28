@@ -30,7 +30,7 @@ AXIOS_INSTANCE.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    console.error('[Response Error]', error);
+    console.error('[Response Error]}', error);
     // Optionally transform or handle error globally
     return Promise.reject(error);
   },
