@@ -5,7 +5,7 @@ export const PUBLIC_ROUTES = [
     "/auth/update-password",
     '/auth/forgot-password',
     '/auth/email-verification',
-    '/email-otp',
+    '/auth/forgot-password',
     '/auth/otp-password-update',
     '/auth/is-profile-actived',
 

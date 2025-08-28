@@ -11,7 +11,7 @@ import type React from "react"
 // import { toast } from "sonner"
 // import Link from "next/link"
 // import { useRouter } from "next/navigation"
-import EmailVerification from "@/components/email-verification"
+import EmailVerification from "@/components/forgot-password"
 
 export default function EmailVerificationPage() {
   // const [email, setEmail] = useState("")

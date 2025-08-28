@@ -1267,6 +1267,64 @@
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
           }
         }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "harshadtibile@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "Optional: New password provided by the user",
+            "example": "Test@123"
+          }
+        }
+      },
+      "ForgotPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT reset token to be used for password reset",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": [
+          "token",
+          "password"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT reset token received from forgot-password endpoint",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "The new password to set",
+            "example": "Test@123"
+          }
+        }
+      },
+      "ResetPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "password successfully updated"
+          }
+        }
       }
     }
   },
@@ -3129,6 +3187,88 @@
           },
           "401": {
             "description": "Unauthorized or expired access token"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/forgot-password": {
+      "post": {
+        "summary": "Forgot Password (Generate Reset Token)",
+        "description": "Initiates the forgot password flow. The user provides their email and optionally a new password. The server responds with a reset token.",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              },
+              "example": {
+                "email": "harshadtibile@gmail.com",
+                "password": "Test@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reset password token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotPasswordResponse"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., email not registered)"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/reset-password": {
+      "post": {
+        "summary": "Reset Password",
+        "description": "Resets the user password using a valid reset token.",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              },
+              "example": {
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "password": "Test@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordResponse"
+                },
+                "example": {
+                  "message": "password successfully updated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired reset token"
           }
         }
       }
