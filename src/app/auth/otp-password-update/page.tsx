@@ -2,6 +2,7 @@
 
 import OtpPasswordUpdate from "@/components/otp-password-update"
 import type React from "react"
+import { Suspense } from "react"
 
 // import { useState } from "react"
 // import { Button } from "@/components/ui/button"
@@ -36,6 +37,8 @@ export default function UpdatePasswordPage() {
   // }
 
   return (
-    <OtpPasswordUpdate />
+    <Suspense fallback={<div>Loading...</div>}>
+      <OtpPasswordUpdate />
+    </Suspense>
   )
 }
